@@ -15,14 +15,11 @@ public class DuplicateChecker {
             return false;
         }
 
+        Set<Integer> seen = new HashSet<>();
         for (int i = 0; i < list.size(); i++) {
             int currentNumber = list.get(i);
-
-            for (int j = i + 1; j < list.size(); j++) {
-                int nextNumber = list.get(j);
-                if (currentNumber == nextNumber) {
-                    return true;
-                }
+            if (!seen.add(currentNumber)) {
+                return true;
             }
         }
 
