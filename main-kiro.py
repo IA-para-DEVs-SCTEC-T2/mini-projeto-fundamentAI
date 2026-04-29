@@ -22,9 +22,9 @@ def verificar_duplicados(lista):
 
 verificar_duplicados(lista)
 
-# prompt usado no Kiro: kiro, crie em pyhton uma função que verifica se existem numeros duplicados em uma lista de 20 numeros interios, com 5 destes 20 sendo duplicados. Ptint se há duplicados, quais são os numeros duplicados e, faça uma limpeza nesta lista, removendo os numeros duplicados, printando na tela a lista "limpa".
+# prompt usado no Kiro: kiro, crie em Python uma função que verifica se existem numeros duplicados em uma lista de 20 numeros inteiros, com 5 destes 20 sendo duplicados. Print se há duplicados, quais são os numeros duplicados e, faça uma limpeza nesta lista, removendo os numeros duplicados, printando na tela a lista "limpa".
 
 # Kiro, compare o arquivo "main.py" crido na mão, com o arquivo "main-kiro.py que vcês mesmo criou. Quero que você compare a implementação com em legilibilidade, eficiência e edge cases, por gentileza.
 
-# Kiro, quero que você crie um arquivo em markdow com este resultado da comparação, este arquivo vai se chamar "comparaçao_cod_manual_kiro.md"
+# Kiro, quero que você crie um arquivo em markdown com este resultado da comparação, este arquivo vai se chamar "comparaçao_cod_manual_kiro.md"
 
