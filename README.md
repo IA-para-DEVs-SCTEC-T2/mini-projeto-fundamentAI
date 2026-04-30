@@ -1,4 +1,4 @@
-# 📊 Analisador Fundamentalista de Ações da B3
+# 📊 FundamentAI - Analisador Fundamentalista de Ações da B3
 
 ---
 
@@ -187,6 +187,23 @@ O prompt define explicitamente o **formato de saída** (estruturado) para garant
 - Alertas inteligentes
 - Integração com dados em tempo real
 - Machine Learning para scoring avançado
+
+---
+
+## 🛠️ Ambiente de Desenvolvimento
+
+Este projeto utiliza o **[Kiro](https://kiro.dev)** como IDE, no modo **Auto**.
+
+O Kiro é uma IDE com IA integrada que permite desenvolvimento assistido com contexto completo do projeto. O modo **Auto** permite que o agente execute alterações de forma autônoma no workspace, acelerando o desenvolvimento.
+
+Os arquivos de steering em `.kiro/steering/` definem o contexto permanente injetado em todas as interações com o Kiro:
+
+| Arquivo | Conteúdo |
+|---|---|
+| `product.md` | Visão do produto, problema, público-alvo e escopo |
+| `structure.md` | Organização de diretórios e convenções de código |
+| `tech.md` | Stack tecnológica e decisões de arquitetura |
+| `gitflow.md` | Fluxo de versionamento Git e convenções de commits |
 
 ---
 

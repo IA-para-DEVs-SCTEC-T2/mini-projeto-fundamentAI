@@ -115,3 +115,13 @@ frontend/               → dashboard, gráficos e veredito
 - **Dados públicos apenas** — nenhuma fonte paga ou proprietária no escopo inicial
 - **Análise fundamentalista exclusivamente** — sem análise técnica/gráfica
 - **Segurança:** caso carteiras de usuário sejam implementadas, exige criptografia no armazenamento e boas práticas de autenticação (ex: JWT + bcrypt)
+
+---
+
+## IDE e Ambiente de Desenvolvimento
+
+Utilizar o **[Kiro](https://kiro.dev)** como IDE, no modo **Auto**.
+
+- O modo **Auto** permite que o agente execute alterações de forma autônoma no workspace
+- Os arquivos em `.kiro/steering/` fornecem contexto permanente do projeto ao agente em todas as interações
+- Não utilizar outros modos (Supervised) como padrão — reservar para situações que exijam revisão manual de cada alteração
