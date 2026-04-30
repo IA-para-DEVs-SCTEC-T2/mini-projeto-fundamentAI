@@ -27,4 +27,3 @@ verificar_duplicados(lista)
 # Kiro, compare o arquivo "main.py" crido na mão, com o arquivo "main-kiro.py que vcês mesmo criou. Quero que você compare a implementação com em legilibilidade, eficiência e edge cases, por gentileza.
 
 # Kiro, quero que você crie um arquivo em markdown com este resultado da comparação, este arquivo vai se chamar "comparaçao_cod_manual_kiro.md"
-
