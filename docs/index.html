@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FundamentAí — Apresentação</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Light palette */
+  --bg:        #F5F7FA;
+  --bg2:       #FFFFFF;
+  --bg3:       #EDF0F4;
+  --bg4:       #E4E9F0;
+  --border:    #D6DCE6;
+  --border2:   #C4CDD9;
+
+  /* Text */
+  --ink:       #0F1923;
+  --ink2:      #2C3E50;
+  --ink3:      #5A6A7A;
+  --ink4:      #8A9BB0;
+
+  /* Brand */
+  --teal:      #009E93;
+  --teal-light:#E0F5F3;
+  --teal-mid:  #B2E8E4;
+  --teal-dark: #007A70;
+
+  /* Status */
+  --green:     #16A34A;
+  --green-bg:  #DCFCE7;
+  --amber:     #D97706;
+  --amber-bg:  #FEF3C7;
+  --red:       #DC2626;
+  --red-bg:    #FEE2E2;
+  --blue:      #2563EB;
+  --blue-bg:   #DBEAFE;
+}
+
+html,body{width:100%;height:100%;background:#E8ECF1;font-family:'DM Sans',sans-serif;overflow:hidden}
+
+/* ── DECK ── */
+.deck{width:100vw;height:100vh;position:relative}
+.slide{
+  position:absolute;inset:0;width:100%;height:100%;
+  display:flex;flex-direction:column;
+  opacity:0;pointer-events:none;
+  transition:opacity .5s ease;
+}
+.slide.active{opacity:1;pointer-events:all}
+
+
+
+/* ══════════════════════════════
+   SLIDE 1 — O PROBLEMA
+══════════════════════════════ */
+#s1{background:var(--bg);display:grid;grid-template-columns:55% 45%}
+
+.s1-left{
+  padding:44px 44px 28px 52px;
+  display:flex;flex-direction:column;
+  position:relative;
+}
+
+/* Teal left stripe */
+.s1-left::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:5px;background:var(--teal);
+}
+
+.s1-label{
+  font-size:10.5px;font-weight:600;letter-spacing:.2em;
+  color:var(--teal);text-transform:uppercase;margin-bottom:14px;
+}
+.s1-headline{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(32px,3.8vw,52px);font-weight:900;line-height:1.0;
+  color:var(--ink);margin-bottom:24px;
+}
+.s1-headline em{color:var(--teal);font-style:normal}
+
+/* PERSONA */
+.persona-pair{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.persona-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+  padding:11px 13px;box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+.persona-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.avatar{
+  width:42px;height:42px;border-radius:50%;flex-shrink:0;
+  overflow:hidden;border:2px solid var(--teal);background:var(--teal-light);
+}
+.avatar svg{width:42px;height:42px;display:block}
+.persona-name{font-size:13px;font-weight:600;color:var(--ink);line-height:1.3}
+.persona-role{font-size:10.5px;color:var(--ink3);margin-top:1px}
+
+/* BUBBLE */
+.bubble{
+  background:var(--bg3);border:1px solid var(--border);
+  border-left:3px solid var(--teal);
+  border-radius:0 8px 8px 0;
+  padding:9px 12px;position:relative;
+}
+.bubble::before{
+  content:'\201C';font-family:Georgia,serif;font-size:22px;
+  color:var(--teal);position:absolute;top:-6px;left:6px;line-height:1;opacity:.65;
+}
+.bubble p{font-size:11.5px;color:var(--ink2);line-height:1.55;padding-top:4px}
+.bubble strong{color:var(--teal-dark);font-weight:600}
+
+/* PAINS */
+.pains{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+.pain{display:flex;align-items:center;gap:9px}
+.pain-icon{
+  width:26px;height:26px;border-radius:7px;
+  background:var(--teal-light);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.pain-icon svg{width:13px;height:13px;stroke:var(--teal-dark);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pain-text{font-size:12.5px;color:var(--ink2)}
+
+/* STATEMENT */
+.statement{
+  background:var(--teal-light);border:1px solid var(--teal-mid);
+  border-radius:8px;padding:11px 14px;
+  font-size:12.5px;color:var(--ink2);line-height:1.55;
+}
+.statement strong{color:var(--teal-dark);font-weight:600}
+
+/* RIGHT — CHAOS */
+.s1-right{
+  position:relative;overflow:hidden;
+  background:var(--bg3);
+  border-left:1px solid var(--border);
+}
+/* .big-q removed — replaced by overload funnel */
+.s1-right{
+  display:flex!important;flex-direction:column;
+  padding:20px 16px 52px;gap:12px;overflow:hidden;
+}
+.doc-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:10px;padding:14px;z-index:2;
+  box-shadow:0 4px 20px rgba(0,0,0,.09);flex-shrink:0;
+}
+.doc-top{
+  display:flex;align-items:center;gap:8px;margin-bottom:10px;
+  border-bottom:1px solid var(--border);padding-bottom:8px;
+}
+.doc-badge{
+  font-size:9px;font-weight:700;letter-spacing:.08em;
+  padding:2px 7px;border-radius:4px;
+  background:var(--red-bg);color:var(--red);
+}
+.doc-title{font-size:11px;font-weight:600;color:var(--ink)}
+.doc-subtitle{font-size:9.5px;color:var(--ink4);margin-left:auto}
+.doc-table{width:100%;border-collapse:collapse;font-size:10px}
+.doc-table th{
+  color:var(--ink4);text-align:left;
+  padding:5px 7px;border-bottom:1px solid var(--border);white-space:nowrap;
+  font-weight:600;background:var(--bg3);font-size:9.5px;
+}
+.doc-table td{padding:5px 7px;color:var(--ink2);white-space:nowrap}
+.doc-table tr:nth-child(even) td{background:var(--bg3)}
+.hl-red{color:var(--red)!important;background:var(--red-bg)!important;font-weight:700}
+.hl-amber{color:var(--amber)!important;background:var(--amber-bg)!important;font-weight:700}
+.sticker{
+  display:inline-block;font-size:10px;font-weight:700;
+  padding:3px 8px;border-radius:4px;
+  box-shadow:1px 2px 6px rgba(0,0,0,.12);
+}
+.sticker-amber{background:#FDE68A;color:#78350F}
+.sticker-red{background:#FECACA;color:#991B1B}
+.sticker-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.news-section{flex-shrink:0;z-index:3}
+.news-section-label{
+  font-size:9.5px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink4);margin-bottom:6px;
+}
+.news-cards{display:flex;flex-direction:column;gap:6px}
+.news-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:10px 12px;
+  display:flex;gap:10px;align-items:flex-start;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.news-left{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
+.news-tag{
+  font-size:9px;font-weight:700;padding:2px 6px;
+  border-radius:3px;white-space:nowrap;align-self:flex-start;
+}
+.news-tag.red{background:var(--red-bg);color:var(--red)}
+.news-tag.amber{background:var(--amber-bg);color:var(--amber)}
+.news-headline{font-size:11.5px;color:var(--ink);font-weight:500;line-height:1.4}
+.news-source{font-size:9px;color:var(--ink4)}
+.news-right{
+  display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;
+}
+.news-ticker{font-size:10px;font-weight:700;color:var(--ink);font-family:monospace}
+.news-var{font-size:12px;font-weight:700}
+.news-var.down{color:var(--red)}
+.news-var.neutral{color:var(--amber)}
+
+/* FUNNEL */
+.funnel-section{flex-shrink:0;z-index:2}
+.funnel-label{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);margin-bottom:6px}
+.funnel-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+
+/* CHALLENGES */
+.challenges-section{margin-top:14px}
+.challenges-label{
+  font-size:10px;font-weight:600;letter-spacing:.16em;
+  color:var(--amber);text-transform:uppercase;margin-bottom:9px;
+  display:flex;align-items:center;gap:6px;
+}
+
+.challenges-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+}
+.ch-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:12px;padding:16px 12px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+  border-top:3px solid transparent;
+}
+.ch-card.ch-red{border-top-color:var(--red)}
+.ch-card.ch-amber{border-top-color:var(--amber)}
+.ch-card.ch-blue{border-top-color:var(--blue)}
+.ch-card.ch-teal{border-top-color:var(--teal)}
+.ch-icon{font-size:26px;line-height:1}
+.ch-title{font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.3}
+
+/* Footer */
+.s1-footer{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:7px 52px;
+  background:var(--bg2);border-top:1px solid var(--border);
+  font-size:9.5px;color:var(--ink4);
+  display:flex;align-items:center;gap:7px;z-index:10;
+}
+.s1-footer span:first-child{color:var(--amber);font-size:12px}
+
+/* ══════════════════════════════
+   SLIDE 2 — A SOLUÇÃO
+══════════════════════════════ */
+#s2{background:var(--bg);display:grid;grid-template-columns:65% 35%}
+
+.s2-left{
+  padding:36px 36px 52px 52px;
+  display:flex;flex-direction:column;
+  position:relative;
+}
+.s2-left::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:5px;background:var(--teal);
+}
+
+.s2-label{
+  font-size:10.5px;font-weight:600;letter-spacing:.2em;
+  color:var(--teal);text-transform:uppercase;margin-bottom:10px;
+}
+.s2-headline{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(28px,3.2vw,44px);font-weight:900;
+  line-height:1.0;color:var(--ink);margin-bottom:5px;
+}
+.s2-headline em{color:var(--teal);font-style:normal}
+.s2-sub{
+  font-size:12.5px;color:var(--ink3);line-height:1.55;
+  margin-bottom:14px;max-width:520px;
+}
+
+/* FLOW */
+.flow{display:flex;align-items:flex-start;gap:0;margin-bottom:14px}
+.flow-step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.flow-step:not(:last-child)::after{
+  content:'→';position:absolute;right:-11px;top:16px;
+  color:var(--teal);font-size:15px;font-weight:700;z-index:2;
+}
+.step-card{
+  width:100%;height:170px;background:var(--bg2);
+  border:1px solid var(--border);border-radius:10px;
+  padding:10px 6px 9px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+.step-card.highlight{
+  border-color:var(--teal);border-width:1.5px;
+  background:var(--teal-light);
+  box-shadow:0 0 0 3px rgba(0,158,147,.12);
+}
+.step-num{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--teal);color:#fff;
+  font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.step-card.highlight .step-num{background:var(--teal-dark)}
+.step-icon{width:24px;height:24px;stroke:var(--teal-dark);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.step-label{font-size:13px;font-weight:700;color:var(--ink);text-align:center}
+.step-card.highlight .step-label{color:var(--teal-dark)}
+.step-sub{font-size:11px;color:var(--ink3);text-align:center;line-height:1.4}
+.step-badges{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:1px}
+.src-badge{
+  font-size:10px;font-weight:700;padding:3px 7px;
+  border-radius:4px;background:var(--bg3);
+  color:var(--ink3);border:1px solid var(--border2);
+}
+.step-card.highlight .src-badge{
+  background:rgba(0,158,147,.12);
+  color:var(--teal-dark);border-color:var(--teal-mid);
+}
+
+/* STACK */
+.stack-label{
+  font-size:10.5px;font-weight:600;letter-spacing:.15em;
+  color:var(--teal);text-transform:uppercase;margin-bottom:10px;
+}
+.stack-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.stack-pill{
+  display:flex;align-items:center;gap:11px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:12px;padding:13px 18px;
+  box-shadow:0 1px 4px rgba(0,0,0,.04);
+}
+.pill-icon{font-size:26px;line-height:1}
+.pill-name{font-size:14px;font-weight:600;color:var(--ink)}
+.pill-sub{font-size:12px;color:var(--ink3)}
+
+/* DISCLAIMER */
+.disclaimer{
+  background:var(--amber-bg);border-left:3px solid var(--amber);
+  border-radius:0 7px 7px 0;
+  padding:9px 12px;display:flex;align-items:flex-start;gap:8px;
+}
+.disc-icon{font-size:13px;line-height:1.4;color:var(--amber);flex-shrink:0}
+.disc-text{font-size:10.5px;color:#78350F;line-height:1.6}
+.disc-text strong{color:#92400E}
+
+/* DIVIDER */
+.s2-divider{
+  position:absolute;left:65%;top:8%;bottom:8%;
+  width:1px;
+  background:linear-gradient(to bottom,transparent,var(--teal) 30%,var(--teal) 70%,transparent);
+  opacity:.3;z-index:3;
+}
+
+/* RIGHT — MOCKUP */
+.s2-right{
+  position:relative;display:flex;align-items:center;justify-content:center;
+  padding:26px 20px 52px 14px;
+  background:var(--bg3);border-left:1px solid var(--border);overflow:hidden;
+}
+.mockup-glow{
+  position:absolute;width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,158,147,.12),transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;
+}
+
+/* BROWSER */
+.browser{
+  width:100%;max-width:330px;
+  background:var(--bg2);border-radius:11px;
+  border:1px solid var(--border);
+  box-shadow:0 16px 48px rgba(0,0,0,.12),0 0 0 1px rgba(0,158,147,.08);
+  transform:perspective(900px) rotateY(-5deg) rotateX(1.5deg);
+  animation:floatIn .8s .25s both;
+}
+@keyframes floatIn{
+  from{opacity:0;transform:perspective(900px) rotateY(-5deg) rotateX(1.5deg) translateX(36px)}
+  to{opacity:1;transform:perspective(900px) rotateY(-5deg) rotateX(1.5deg) translateX(0)}
+}
+.browser-bar{
+  background:var(--bg3);border-radius:11px 11px 0 0;
+  padding:8px 11px;display:flex;align-items:center;gap:5px;
+  border-bottom:1px solid var(--border);
+}
+.dot{width:8px;height:8px;border-radius:50%}
+.dot-r{background:#FF5F57}.dot-y{background:#FFBD2E}.dot-g{background:#28C840}
+.browser-url{
+  flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:4px;
+  padding:3px 7px;font-size:8.5px;color:var(--ink3);margin-left:5px;
+}
+.app-content{padding:10px;display:flex;flex-direction:column;gap:8px;background:var(--bg3)}
+
+/* App search */
+.app-search{display:flex;gap:5px}
+.app-search input{
+  flex:1;background:var(--bg2);border:1px solid var(--border);
+  border-radius:6px;padding:5px 9px;font-size:11px;
+  color:var(--ink);font-family:monospace;font-weight:600;
+}
+.app-search button{
+  background:var(--teal);color:#fff;border:none;
+  border-radius:6px;padding:5px 9px;font-size:9.5px;font-weight:700;
+  cursor:pointer;white-space:nowrap;
+}
+
+/* App company */
+.app-company{
+  display:flex;align-items:center;gap:7px;
+  background:var(--bg2);border-radius:7px;padding:7px 9px;
+  border:1px solid var(--border);
+}
+.company-logo{
+  width:28px;height:28px;border-radius:6px;
+  background:#D97706;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:900;color:#fff;font-family:'Barlow Condensed',sans-serif;
+}
+.company-name{font-size:11px;font-weight:700;color:var(--ink)}
+.company-meta{font-size:9px;color:var(--ink3)}
+.cbadge{
+  font-size:8.5px;padding:2px 5px;border-radius:3px;margin-left:auto;
+  background:var(--blue-bg);color:var(--blue);font-weight:700;
+}
+
+/* Verdict */
+.verdict-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:9px;
+}
+.verdict-top{display:flex;align-items:center;gap:9px}
+.verdict-badge{
+  background:var(--blue);border-radius:6px;
+  padding:4px 11px;font-size:13px;font-weight:900;color:#fff;
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;
+}
+.gauge{position:relative;width:46px;height:46px;flex-shrink:0}
+.gauge svg{transform:rotate(-90deg)}
+.gauge-num{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--teal-dark);
+}
+.verdict-bullets{flex:1;display:flex;flex-direction:column;gap:3px}
+.vb{font-size:9px;color:var(--ink2);display:flex;align-items:center;gap:4px}
+.dot-ok{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.dot-warn{width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0}
+
+/* Metrics */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.metric{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:6px 7px;position:relative}
+.metric-name{font-size:8.5px;color:var(--ink3);margin-bottom:1px;font-weight:500}
+.metric-val{font-size:13px;font-weight:700;color:var(--teal-dark)}
+.metric-bar{height:3px;background:var(--bg4);border-radius:2px;margin-top:3px;overflow:hidden}
+.metric-fill{height:100%;border-radius:2px;background:var(--teal)}
+.metric-fill.warn{background:var(--amber)}
+.metric-status{position:absolute;top:5px;right:6px;width:6px;height:6px;border-radius:50%}
+.st-ok{background:var(--green)}.st-warn{background:var(--amber)}
+
+/* Tooltip */
+.tooltip{
+  background:var(--bg2);border:1.5px solid var(--teal);border-radius:7px;
+  padding:7px 8px;position:relative;
+  box-shadow:0 4px 12px rgba(0,158,147,.12);
+}
+.tooltip::before{
+  content:'';position:absolute;bottom:100%;left:38px;
+  border:5px solid transparent;border-bottom-color:var(--teal);
+}
+.tooltip-title{font-size:9.5px;font-weight:700;color:var(--teal-dark);margin-bottom:2px}
+.tooltip-body{font-size:9px;color:var(--ink2);line-height:1.45}
+
+/* AI section */
+.ai-section{
+  background:var(--teal-light);border:1px solid var(--teal-mid);
+  border-radius:7px;padding:7px 9px;
+  -webkit-mask-image:linear-gradient(to bottom,black 45%,transparent 100%);
+  mask-image:linear-gradient(to bottom,black 45%,transparent 100%);
+}
+.ai-label{font-size:9px;font-weight:700;color:var(--teal-dark);margin-bottom:3px;display:flex;align-items:center;gap:3px}
+.ai-text{font-size:9px;color:var(--ink2);line-height:1.5}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.s1-left>*{animation:fadeUp .45s both}
+.s1-left>*:nth-child(1){animation-delay:.08s}
+.s1-left>*:nth-child(2){animation-delay:.16s}
+.s1-left>*:nth-child(3){animation-delay:.24s}
+.s1-left>*:nth-child(4){animation-delay:.32s}
+.s1-left>*:nth-child(5){animation-delay:.40s}
+.s1-left>*:nth-child(6){animation-delay:.48s}
+.doc-card{animation:fadeUp .5s .15s both}
+.sheet{animation:fadeUp .5s .45s both}
+.news-cards{animation:fadeUp .5s .6s both}
+.sticker{animation:fadeUp .4s both}
+.s2-left>*{animation:fadeUp .45s both}
+.s2-left>*:nth-child(1){animation-delay:.08s}
+.s2-left>*:nth-child(2){animation-delay:.16s}
+.s2-left>*:nth-child(3){animation-delay:.22s}
+.s2-left>*:nth-child(4){animation-delay:.30s}
+.s2-left>*:nth-child(5){animation-delay:.38s}
+.s2-left>*:nth-child(6){animation-delay:.46s}
+.s2-left>*:nth-child(7){animation-delay:.54s}
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- ═══════════ SLIDE 1 — O PROBLEMA ═══════════ -->
+<div class="slide active" id="s1">
+  <div class="s1-left">
+    <div class="s1-label">O Problema</div>
+
+    <h1 class="s1-headline">
+      Investir com inteligência<br>
+      não deveria ser<br>
+      <em>tão difícil.</em>
+    </h1>
+
+    <div class="persona-pair">
+
+      <!-- Persona 1 — Ana Paula -->
+      <div class="persona-card">
+        <div class="persona-header">
+          <div class="avatar"><svg viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="21" cy="21" r="21" fill="#C9E8E6"/>
+  <ellipse cx="21" cy="28" rx="13" ry="8" fill="#0A8C7E"/>
+  <circle cx="21" cy="17" r="7" fill="#F4C2A1"/>
+  <ellipse cx="21" cy="11" rx="7.5" ry="5" fill="#3D2B1F"/>
+  <ellipse cx="14.5" cy="13" rx="2" ry="4" fill="#3D2B1F"/>
+  <ellipse cx="27.5" cy="13" rx="2" ry="4" fill="#3D2B1F"/>
+  <circle cx="19" cy="17.5" r="1" fill="#5C3A1E"/>
+  <circle cx="23" cy="17.5" r="1" fill="#5C3A1E"/>
+  <path d="M19 20.5 Q21 22 23 20.5" stroke="#C97B6E" stroke-width="1" fill="none" stroke-linecap="round"/>
+</svg></div>
+          <div>
+            <div class="persona-name">Ana Paula, 31 anos</div>
+            <div class="persona-role">Investidora iniciante · Quer montar carteira na B3</div>
+          </div>
+        </div>
+        <div class="bubble">
+          <p>"Quero avaliar empresas da B3 para montar minha carteira. Por onde começo? <strong>Não quero notícias</strong> — quero critérios baseados em <strong>dados reais do negócio.</strong>"</p>
+        </div>
+      </div>
+
+      <!-- Persona 2 — Jonas -->
+      <div class="persona-card">
+        <div class="persona-header">
+          <div class="avatar"><svg viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="21" cy="21" r="21" fill="#D4E8F5"/>
+  <ellipse cx="21" cy="28" rx="13" ry="8" fill="#1A5F8A"/>
+  <circle cx="21" cy="17" r="7" fill="#E8C49A"/>
+  <ellipse cx="21" cy="10.5" rx="7" ry="4.5" fill="#6B5744"/>
+  <path d="M14 12 Q21 8 28 12" fill="#6B5744"/>
+  <circle cx="19" cy="17.5" r="1" fill="#4A2E1A"/>
+  <circle cx="23" cy="17.5" r="1" fill="#4A2E1A"/>
+  <path d="M18.5 20.5 Q21 22.5 23.5 20.5" stroke="#B87C5A" stroke-width="1" fill="none" stroke-linecap="round"/>
+  <path d="M15 15 Q14 14 14.5 13" stroke="#A89080" stroke-width="0.8" fill="none"/>
+  <path d="M27 15 Q28 14 27.5 13" stroke="#A89080" stroke-width="0.8" fill="none"/>
+</svg></div>
+          <div>
+            <div class="persona-name">Jonas Coelho, 50 anos</div>
+            <div class="persona-role">Investidor experiente · Sem tempo para acompanhar ativos</div>
+          </div>
+        </div>
+        <div class="bubble">
+          <p>"Não confio em assessorias — têm viéses. <strong>Não tenho tempo</strong> de acompanhar o mercado todo dia. Quero acessar <strong>uma vez por mês</strong> e saber em qual ativo investir, baseado em fundamentos."</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="pains">
+      <div class="pain">
+        <div class="pain-icon"><svg viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h12"/></svg></div>
+        <span class="pain-text">Dados dispersos em múltiplos portais e fontes</span>
+      </div>
+      <div class="pain">
+        <div class="pain-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <span class="pain-text">Análise fundamentalista demanda horas de pesquisa</span>
+      </div>
+      <div class="pain">
+        <div class="pain-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <span class="pain-text">Sem tempo para acompanhar o mercado constantemente</span>
+      </div>
+      <div class="pain">
+        <div class="pain-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+        <span class="pain-text">Assessorias têm viéses — falta uma fonte imparcial</span>
+      </div>
+    </div>
+
+    <div class="statement">
+      Do investidor iniciante ao experiente —<br>
+      <strong>todos precisam de análise fundamentada, clara e sem viés.</strong><br>
+      Por isso criamos o <strong>FundamentAí.</strong>
+    </div>
+  </div>
+
+  <!-- RIGHT — CAOS VISUAL -->
+  <div class="s1-right">
+
+    <!-- Tabela de indicadores — destaque principal -->
+    <div class="doc-card">
+      <div class="doc-top">
+        <span class="doc-badge">ITR 4T24</span>
+        <span class="doc-title">Relatório de Resultados — VALE3</span>
+        <span class="doc-subtitle">72 pág · CVM</span>
+      </div>
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>Indicador</th><th>2024</th><th>2023</th>
+            <th>Δ%</th><th>Setor</th><th>Bench.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>EV/EBITDA</td><td class="hl-amber">5.8×</td><td>6.2×</td><td>-6.5%</td><td>5.1×</td><td>4.8×</td></tr>
+          <tr><td>ROIC</td><td class="hl-red">12.3%</td><td>18.7%</td><td>-34%</td><td>14.2%</td><td>16.0%</td></tr>
+          <tr><td>P/VP</td><td>1.8×</td><td>1.6×</td><td>+12%</td><td>2.1×</td><td>1.9×</td></tr>
+          <tr><td>Marg. EBITDA</td><td class="hl-amber">38.2%</td><td>42.1%</td><td>-9.3%</td><td>35.0%</td><td>38.5%</td></tr>
+          <tr><td>Dív/EBITDA</td><td class="hl-red">2.4×</td><td>1.9×</td><td>+26%</td><td>1.8×</td><td>2.0×</td></tr>
+          <tr><td>CAGR 5a Rec.</td><td>8.4%</td><td>11.2%</td><td>-25%</td><td>9.1%</td><td>10.0%</td></tr>
+        </tbody>
+      </table>
+      <!-- Post-its inline -->
+      <div class="sticker-row">
+        <span class="sticker sticker-red">O que é ROIC?</span>
+        <span class="sticker sticker-red">Isso é bom ou ruim?</span>
+        <span class="sticker sticker-amber">Qual usar?</span>
+      </div>
+    </div>
+
+    <!-- Funil de sobrecarga de informação -->
+    <div class="funnel-section">
+      <div class="funnel-label">Sobrecarga de informação</div>
+      <div class="funnel-wrap">
+        <svg viewBox="0 0 360 148" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+          <defs>
+            <marker id="arr" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M1 1L6 4L1 7" fill="none" stroke="#C4CDD9" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+            <marker id="arr-red" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M1 1L6 4L1 7" fill="none" stroke="#FCA5A5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </marker>
+          </defs>
+
+          <!-- CENTER: person with question mark -->
+          <circle cx="180" cy="80" r="26" fill="#E0F5F3" stroke="#009E93" stroke-width="1.5"/>
+          <!-- person body (simple silhouette) -->
+          <circle cx="180" cy="70" r="9" fill="#0A8C7E"/>
+          <ellipse cx="180" cy="90" rx="13" ry="9" fill="#0A8C7E"/>
+          <!-- ? on top -->
+          <text x="180" y="67" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="900" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">?</text>
+
+          <!-- SOURCE NODES — arranged in a wide arc around center -->
+
+          <!-- TOP ROW (5 sources) -->
+          <!-- B3 -->
+          <rect x="12" y="6" width="44" height="22" rx="5" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1"/>
+          <text x="34" y="18" font-family="'DM Sans',sans-serif" font-size="8.5" font-weight="700" fill="#1D4ED8" text-anchor="middle" dominant-baseline="middle">B3</text>
+          <line x1="56" y1="17" x2="155" y2="62" stroke="#BFDBFE" stroke-width="1" marker-end="url(#arr)"/>
+
+          <!-- CVM -->
+          <rect x="72" y="6" width="44" height="22" rx="5" fill="#FCE7F3" stroke="#F9A8D4" stroke-width="1"/>
+          <text x="94" y="18" font-family="'DM Sans',sans-serif" font-size="8.5" font-weight="700" fill="#9D174D" text-anchor="middle" dominant-baseline="middle">CVM</text>
+          <line x1="110" y1="17" x2="164" y2="55" stroke="#FBCFE8" stroke-width="1" marker-end="url(#arr)"/>
+
+          <!-- Fundamentus -->
+          <rect x="138" y="4" width="44" height="22" rx="5" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1"/>
+          <text x="160" y="15" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#166534" text-anchor="middle" dominant-baseline="middle">Fundamen-</text>
+          <text x="160" y="23" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#166534" text-anchor="middle">tus</text>
+          <line x1="160" y1="26" x2="174" y2="54" stroke="#BBF7D0" stroke-width="1" marker-end="url(#arr)"/>
+
+          <!-- Status Invest -->
+          <rect x="202" y="4" width="44" height="22" rx="5" fill="#FFF7ED" stroke="#FED7AA" stroke-width="1"/>
+          <text x="224" y="15" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#9A3412" text-anchor="middle" dominant-baseline="middle">Status</text>
+          <text x="224" y="23" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#9A3412" text-anchor="middle">Invest</text>
+          <line x1="218" y1="26" x2="186" y2="54" stroke="#FED7AA" stroke-width="1" marker-end="url(#arr)"/>
+
+          <!-- InfoMoney -->
+          <rect x="264" y="6" width="44" height="22" rx="5" fill="#FFF1F2" stroke="#FECDD3" stroke-width="1"/>
+          <text x="286" y="18" font-family="'DM Sans',sans-serif" font-size="8" font-weight="700" fill="#9F1239" text-anchor="middle" dominant-baseline="middle">InfoMoney</text>
+          <line x1="280" y1="17" x2="203" y2="62" stroke="#FECDD3" stroke-width="1" marker-end="url(#arr)"/>
+
+          <!-- LEFT SIDE SOURCES -->
+          <!-- YouTube -->
+          <rect x="4" y="56" width="50" height="22" rx="5" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1"/>
+          <text x="29" y="68" font-family="'DM Sans',sans-serif" font-size="8.5" font-weight="700" fill="#991B1B" text-anchor="middle" dominant-baseline="middle">YouTube</text>
+          <line x1="54" y1="67" x2="153" y2="76" stroke="#FCA5A5" stroke-width="1" marker-end="url(#arr-red)"/>
+
+          <!-- Twitter/X -->
+          <rect x="4" y="96" width="50" height="22" rx="5" fill="#F0F9FF" stroke="#BAE6FD" stroke-width="1"/>
+          <text x="29" y="108" font-family="'DM Sans',sans-serif" font-size="8.5" font-weight="700" fill="#0C4A6E" text-anchor="middle" dominant-baseline="middle">Twitter/X</text>
+          <line x1="54" y1="107" x2="153" y2="87" stroke="#BAE6FD" stroke-width="1" marker-end="url(#arr)"/>
+
+          <!-- RIGHT SIDE SOURCES -->
+          <!-- Valor Econômico -->
+          <rect x="306" y="56" width="50" height="22" rx="5" fill="#F7FEE7" stroke="#BEF264" stroke-width="1"/>
+          <text x="331" y="64" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#365314" text-anchor="middle" dominant-baseline="middle">Valor</text>
+          <text x="331" y="72" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#365314" text-anchor="middle">Econômico</text>
+          <line x1="306" y1="67" x2="207" y2="76" stroke="#D9F99D" stroke-width="1" marker-end="url(#arr)"/>
+
+          <!-- Assessoria -->
+          <rect x="306" y="96" width="50" height="22" rx="5" fill="#FDF4FF" stroke="#E9D5FF" stroke-width="1"/>
+          <text x="331" y="104" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#6B21A8" text-anchor="middle" dominant-baseline="middle">Assessoria</text>
+          <text x="331" y="112" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#6B21A8" text-anchor="middle">Financeira</text>
+          <line x1="306" y1="107" x2="207" y2="87" stroke="#E9D5FF" stroke-width="1" marker-end="url(#arr)"/>
+
+          <!-- BOTTOM ROW -->
+          <!-- Relatórios Banco -->
+          <rect x="62" y="118" width="50" height="22" rx="5" fill="#FFFBEB" stroke="#FDE68A" stroke-width="1"/>
+          <text x="87" y="126" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#78350F" text-anchor="middle" dominant-baseline="middle">Relatórios</text>
+          <text x="87" y="134" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#78350F" text-anchor="middle">Banco</text>
+          <line x1="100" y1="118" x2="162" y2="103" stroke="#FDE68A" stroke-width="1" marker-end="url(#arr)"/>
+
+          <!-- Banco Central -->
+          <rect x="128" y="124" width="50" height="22" rx="5" fill="#ECFDF5" stroke="#6EE7B7" stroke-width="1"/>
+          <text x="153" y="132" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#065F46" text-anchor="middle" dominant-baseline="middle">Banco</text>
+          <text x="153" y="140" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#065F46" text-anchor="middle">Central</text>
+          <line x1="160" y1="124" x2="172" y2="107" stroke="#6EE7B7" stroke-width="1" marker-end="url(#arr)"/>
+
+          <!-- Análises pagas -->
+          <rect x="194" y="124" width="50" height="22" rx="5" fill="#EEF2FF" stroke="#C7D2FE" stroke-width="1"/>
+          <text x="219" y="132" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#3730A3" text-anchor="middle" dominant-baseline="middle">Análises</text>
+          <text x="219" y="140" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#3730A3" text-anchor="middle">Pagas</text>
+          <line x1="210" y1="124" x2="190" y2="107" stroke="#C7D2FE" stroke-width="1" marker-end="url(#arr)"/>
+
+          <!-- Fórum/Reddit -->
+          <rect x="250" y="118" width="50" height="22" rx="5" fill="#FFF7ED" stroke="#FDBA74" stroke-width="1"/>
+          <text x="275" y="126" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#9A3412" text-anchor="middle" dominant-baseline="middle">Fóruns /</text>
+          <text x="275" y="134" font-family="'DM Sans',sans-serif" font-size="7.5" font-weight="700" fill="#9A3412" text-anchor="middle">Reddit</text>
+          <line x1="260" y1="118" x2="200" y2="103" stroke="#FDBA74" stroke-width="1" marker-end="url(#arr)"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Notícias de mercado — destaque secundário -->
+    <div class="news-section">
+      <div class="news-section-label">Notícias de mercado</div>
+      <div class="news-cards">
+        <div class="news-card">
+          <div class="news-left">
+            <span class="news-tag red">URGENTE</span>
+            <span class="news-headline">Ibovespa cai 2,3% com tensão fiscal e incerteza nos EUA</span>
+            <span class="news-source">Reuters · há 12 min</span>
+          </div>
+          <div class="news-right">
+            <span class="news-ticker">IBOV</span>
+            <span class="news-var down">▼ 2,3%</span>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="news-left">
+            <span class="news-tag amber">MERCADO</span>
+            <span class="news-headline">Selic pode subir mais 0,5pp em março, prevê BTG Pactual</span>
+            <span class="news-source">Valor Econômico · há 34 min</span>
+          </div>
+          <div class="news-right">
+            <span class="news-ticker">SELIC</span>
+            <span class="news-var neutral">13,75%</span>
+          </div>
+        </div>
+        <div class="news-card">
+          <div class="news-left">
+            <span class="news-tag amber">CÂMBIO</span>
+            <span class="news-headline">Dólar fecha em alta e supera R$ 5,20 com aversão a risco</span>
+            <span class="news-source">InfoMoney · há 1h</span>
+          </div>
+          <div class="news-right">
+            <span class="news-ticker">USD/BRL</span>
+            <span class="news-var down">▼ R$ 5,22</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════ SLIDE 2 — A SOLUÇÃO ═══════════ -->
+<div class="slide" id="s2">
+  <div class="s2-divider"></div>
+
+  <div class="s2-left">
+    <div class="s2-label">A Solução</div>
+
+    <h1 class="s2-headline">Fundament<em>Aí</em> — do ticker ao diagnóstico.</h1>
+
+    <p class="s2-sub">Análise fundamentalista potencializada por inteligência artificial —
+    clara, objetiva e acessível para qualquer investidor.</p>
+
+    <!-- FLUXO -->
+    <div class="flow">
+      <div class="flow-step">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <svg class="step-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <span class="step-label">Ticker</span>
+          <span class="step-sub">Usuário informa o ativo</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <svg class="step-icon" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>
+          <span class="step-label">Coleta</span>
+          <span class="step-sub">APIs buscam fundamentos</span>
+          <div class="step-badges"><span class="src-badge">B3</span><span class="src-badge">BCB</span></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <svg class="step-icon" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 7h6M9 12h6M9 17h4"/></svg>
+          <span class="step-label">Score</span>
+          <span class="step-sub">Algoritmos calculam P/L, ROE...</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-card highlight">
+          <div class="step-num">4</div>
+          <svg class="step-icon" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span class="step-label">IA</span>
+          <span class="step-sub">Claude gera análise em linguagem clara</span>
+          <div class="step-badges"><span class="src-badge">Claude API</span></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-card">
+          <div class="step-num">5</div>
+          <svg class="step-icon" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          <span class="step-label">Resultado</span>
+          <span class="step-sub">Interface com score e diagnóstico</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STACK -->
+    <div class="stack-label">Stack tecnológica</div>
+    <div class="stack-row">
+      <div class="stack-pill">
+        <span class="pill-icon">🐍</span>
+        <div><div class="pill-name">Python</div><div class="pill-sub">Backend · ETL · Scoring</div></div>
+      </div>
+      <div class="stack-pill">
+        <span class="pill-icon" style="color:#0EA5E9;font-size:24px">⚛</span>
+        <div><div class="pill-name">React</div><div class="pill-sub">Frontend · UI/UX</div></div>
+      </div>
+      <div class="stack-pill">
+        <span class="pill-icon" style="font-size:20px;font-weight:900;font-family:Georgia;color:var(--teal-dark)">A</span>
+        <div><div class="pill-name">Claude API</div><div class="pill-sub">Análise · Linguagem natural</div></div>
+      </div>
+      <div class="stack-pill">
+        <span class="pill-icon" style="font-size:18px;font-weight:800;color:#1D4ED8">B3</span>
+        <div><div class="pill-name">B3</div><div class="pill-sub">Dados de mercado</div></div>
+      </div>
+      <div class="stack-pill">
+        <span class="pill-icon" style="font-size:22px">👻</span>
+        <div><div class="pill-name">Kiro</div><div class="pill-sub">Dev · IA assistant</div></div>
+      </div>
+      <div class="stack-pill">
+        <span class="pill-icon" style="font-size:18px;font-weight:800;color:var(--green)">BCB</span>
+        <div><div class="pill-name">Banco Central</div><div class="pill-sub">SELIC · IPCA · Macro</div></div>
+      </div>
+    </div>
+
+
+    <!-- DESAFIOS -->
+    <div class="challenges-section">
+      <div class="challenges-label">Desafios</div>
+      <div class="challenges-grid">
+        <div class="ch-card ch-red">
+          <span class="ch-icon">⚖️</span>
+          <span class="ch-title">Regulação CVM</span>
+        </div>
+        <div class="ch-card ch-amber">
+          <span class="ch-icon">💰</span>
+          <span class="ch-title">Gestão de tokens</span>
+        </div>
+        <div class="ch-card ch-blue">
+          <span class="ch-icon">⚡</span>
+          <span class="ch-title">Latência e cache</span>
+        </div>
+        <div class="ch-card ch-teal">
+          <span class="ch-icon">🛡️</span>
+          <span class="ch-title">Alucinações e qualidade</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISCLAIMER -->
+    <div class="disclaimer" style="margin-top:12px">
+      <span class="disc-icon">⚠</span>
+      <span class="disc-text">
+        Esta ferramenta <strong>não fornece recomendações de investimento.</strong>
+        As análises são informativas e baseadas em dados históricos públicos.
+        A margem de erro existe e deve ser considerada. A decisão final é sempre do investidor.
+      </span>
+    </div>
+  </div>
+
+  <!-- RIGHT — MOCKUP -->
+  <div class="s2-right">
+    <div class="mockup-glow"></div>
+    <div class="browser">
+      <div class="browser-bar">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <div class="browser-url">fundamentai.app/analise/PETR4</div>
+      </div>
+
+      <div class="app-content">
+        <!-- Search -->
+        <div class="app-search">
+          <input value="PETR4" readonly>
+          <button>Analisar →</button>
+        </div>
+
+        <!-- Company -->
+        <div class="app-company">
+          <div class="company-logo">P</div>
+          <div>
+            <div class="company-name">Petrobras — PETR4</div>
+            <div class="company-meta">Energia · Petróleo e Gás</div>
+          </div>
+          <span class="cbadge">B3</span>
+        </div>
+
+        <!-- Verdict -->
+        <div class="verdict-card">
+          <div class="verdict-top">
+            <div class="verdict-badge">BOM</div>
+            <div class="gauge">
+              <svg width="46" height="46" viewBox="0 0 46 46">
+                <circle cx="23" cy="23" r="18" fill="none" stroke="#D1FAF7" stroke-width="4"/>
+                <circle cx="23" cy="23" r="18" fill="none" stroke="#009E93" stroke-width="4"
+                  stroke-dasharray="80 33" stroke-linecap="round"/>
+              </svg>
+              <div class="gauge-num">72</div>
+            </div>
+            <div class="verdict-bullets">
+              <div class="vb"><div class="dot-ok"></div>Valuation atrativo — P/L 6.2×</div>
+              <div class="vb"><div class="dot-ok"></div>Rentabilidade sólida — ROE 18.4%</div>
+              <div class="vb"><div class="dot-warn"></div>Alavancagem moderada — 1.8×</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metrics 2×2 -->
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-name">ROE</div>
+            <div class="metric-val">18,4%</div>
+            <div class="metric-bar"><div class="metric-fill" style="width:74%"></div></div>
+            <div class="metric-status st-ok"></div>
+          </div>
+          <div class="metric">
+            <div class="metric-name">P/L</div>
+            <div class="metric-val">6,2×</div>
+            <div class="metric-bar"><div class="metric-fill" style="width:80%"></div></div>
+            <div class="metric-status st-ok"></div>
+          </div>
+          <div class="metric">
+            <div class="metric-name">P/VP</div>
+            <div class="metric-val">0,9×</div>
+            <div class="metric-bar"><div class="metric-fill" style="width:90%"></div></div>
+            <div class="metric-status st-ok"></div>
+          </div>
+          <div class="metric">
+            <div class="metric-name">Margem Líq.</div>
+            <div class="metric-val">22%</div>
+            <div class="metric-bar"><div class="metric-fill warn" style="width:55%"></div></div>
+            <div class="metric-status st-warn"></div>
+          </div>
+        </div>
+
+        <!-- Tooltip -->
+        <div class="tooltip">
+          <div class="tooltip-title">O que é ROE?</div>
+          <div class="tooltip-body">Retorno sobre Patrimônio Líquido — mede quanto a empresa gera de lucro para cada R$ investido pelos acionistas. Acima de 15% é considerado sólido.</div>
+        </div>
+
+        <!-- AI section -->
+        <div class="ai-section">
+          <div class="ai-label">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Análise FundamentAí
+          </div>
+          <div class="ai-text">Com base nos fundamentos analisados, PETR4 apresenta valuation atrativo para o perfil de médio prazo. A rentabilidade permanece sólida com ROE de 18,4%, enquanto o P/L de 6,2× indica desconto em relação ao setor...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+  <div class="challenge-grid">
+
+    <!-- 1. Regulação CVM -->
+    <div class="challenge-card cc-red">
+      <div class="challenge-icon ci-red">⚖️</div>
+      <div class="challenge-title">Regulação CVM</div>
+      <p class="challenge-desc">A CVM regula quem pode emitir recomendações de investimento no Brasil. O produto precisa calibrar linguagem e escopo para operar como ferramenta educativa e informativa — não como consultoria de valores mobiliários sem habilitação. Disclaimers claros e linguagem neutra são obrigatórios.</p>
+      <span class="challenge-tag ct-red">Legal · Compliance</span>
+    </div>
+
+    <!-- 2. Consumo de tokens -->
+    <div class="challenge-card cc-amber">
+      <div class="challenge-icon ci-amber">🪙</div>
+      <div class="challenge-title">Gestão do consumo de tokens</div>
+      <p class="challenge-desc">Cada análise envolve múltiplas chamadas com contexto extenso — dados financeiros, macro e prompt estruturado. Sem roteamento por complexidade, prompt caching e limites por usuário, o custo escala rapidamente. A estratégia de modelo leve para consultas simples e modelo completo para análises profundas é essencial.</p>
+      <span class="challenge-tag ct-amber">Custo · LLM</span>
+    </div>
+
+    <!-- 3. Latência + cache -->
+    <div class="challenge-card cc-blue">
+      <div class="challenge-icon ci-blue">⚡</div>
+      <div class="challenge-title">Latência e cache inteligente</div>
+      <p class="challenge-desc">5 a 8 chamadas de API sequenciais resultam em 10–15s de espera. A solução combina paralelização das chamadas de coleta, streaming da resposta do LLM e cache com TTL por tipo de dado — preços em minutos, fundamentos em dias, macro em semanas. Ativos frequentes como PETR4 e VALE3 devem ser pré-processados.</p>
+      <span class="challenge-tag ct-blue">Performance · UX</span>
+    </div>
+
+    <!-- 4. Alucinação + qualidade -->
+    <div class="challenge-card cc-teal">
+      <div class="challenge-icon ci-teal">🛡️</div>
+      <div class="challenge-title">Alucinações e qualidade dos dados</div>
+      <p class="challenge-desc">O LLM pode gerar valores financeiros plausíveis mas incorretos se os dados não chegarem via ferramenta. Regra inviolável: todo número exibido vem das APIs — o modelo interpreta, nunca calcula. Validação cruzada entre fontes e data de referência visível em cada indicador são proteções fundamentais.</p>
+      <span class="challenge-tag ct-teal">IA · Confiabilidade</span>
+    </div>
+
+  </div>
+
+</div>
+
+</div>
+
+
+
+<script>
+let cur=0;
+const slides=document.querySelectorAll('.slide');
+
+function goTo(n){
+  slides[cur].classList.remove('active');
+
+  cur=n;
+  slides[cur].classList.add('active');
+
+}
+function go(d){goTo(Math.max(0,Math.min(slides.length-1,cur+d)))}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);
+});
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>50)go(dx<0?1:-1);
+});
+</script>
+</body>
+</html>
