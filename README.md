@@ -89,19 +89,22 @@ Criar uma plataforma que:
 |---|---|
 | Backend | Python |
 | Frontend | React |
+| Geração de análises | Anthropic API (Claude) |
 
 ### 🔄 Fluxo de Funcionamento
 
 ```
-Coleta de dados via Python
+Coleta de dados via Python (yfinance, fundamentus, BCB)
         ↓
-Processamento e padronização
+Processamento e padronização dos indicadores
         ↓
 Armazenamento em banco de dados
         ↓
-Geração de prompt estruturado
+Geração de prompt estruturado com os dados processados
         ↓
-Retorno em formato otimizado para renderização no frontend
+Envio à API da Anthropic (Claude Sonnet / Haiku)
+        ↓
+Retorno em formato estruturado otimizado para renderização no frontend
 ```
 
 ### 🔌 Fontes de Dados
@@ -115,12 +118,18 @@ Retorno em formato otimizado para renderização no frontend
 
 ## 🧾 Estrutura do Prompt
 
-O sistema utiliza prompts estruturados contendo:
+O sistema utiliza prompts estruturados enviados à **API da Anthropic (Claude)** contendo:
 
-- Dados financeiros confiáveis
-- Indicadores calculados
-- Contexto macroeconômico
-- Regras de análise
+- Dados financeiros confiáveis coletados de fontes públicas
+- Indicadores calculados (ROE, ROIC, P/L, P/VP, etc.)
+- Contexto macroeconômico (SELIC, IPCA)
+- Regras de análise e critérios de avaliação
+
+O prompt define explicitamente o **formato de saída** (estruturado) para garantir parsing confiável e renderização consistente na UI.
+
+**Modelos utilizados:**
+- `claude-sonnet-4-5` — análises completas, maior qualidade de raciocínio
+- `claude-haiku-4-5` — consultas rápidas ou de menor complexidade
 
 **Saída esperada:**
 
