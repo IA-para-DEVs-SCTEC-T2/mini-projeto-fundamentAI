@@ -207,6 +207,91 @@ Os arquivos de steering em `.kiro/steering/` definem o contexto permanente injet
 
 ---
 
+## 📝 Prompt Logging
+
+Este projeto implementa um sistema automático de **logging de prompts** executados no Kiro, organizado por branch Git. O objetivo é manter rastreabilidade completa das interações com o agente durante o desenvolvimento.
+
+### Como Funciona
+
+Sempre que você submete um prompt ao Kiro, o sistema automaticamente:
+
+- Registra o conteúdo do prompt
+- Captura metadados (branch, responsável, data/hora)
+- Salva em arquivo Markdown específico da branch
+- Mantém histórico incremental e versionável
+
+### Estrutura de Logs
+
+```
+.kiro/prompt-logs/
+├── main.md                 # Logs da branch main
+├── develop.md              # Logs da branch develop
+├── feature-auth.md         # Logs de feature/auth
+└── bugfix-crash-fix.md     # Logs de bugfix/crash-fix
+```
+
+### Consulta de Logs
+
+**Ver logs de uma branch:**
+```bash
+cat .kiro/prompt-logs/<branch-name>.md
+```
+
+**Últimas entradas:**
+```bash
+tail -n 50 .kiro/prompt-logs/<branch-name>.md
+```
+
+**Buscar por palavra-chave:**
+```bash
+grep -A 10 "palavra-chave" .kiro/prompt-logs/<branch-name>.md
+```
+
+### Versionamento de Logs
+
+**Decisão:** Os arquivos de log de prompts **são versionados no Git** por padrão.
+
+**Justificativa:**
+- **Rastreabilidade:** Facilita code reviews ao permitir que revisores entendam o contexto das decisões tomadas durante o desenvolvimento
+- **Documentação:** Preserva o histórico completo do processo de desenvolvimento para referência futura
+- **Compartilhamento de conhecimento:** Permite que membros da equipe aprendam com as interações anteriores
+- **Auditoria:** Mantém registro completo das interações com o agente Kiro
+
+**Considerações:**
+- Os logs contêm apenas informações do projeto (prompts, metadados de Git)
+- Não contêm dados sensíveis (tokens, senhas, chaves de API)
+- O formato Markdown facilita diffs legíveis no Git
+- Arquivos crescem incrementalmente, mas permanecem em formato texto
+
+**Alternativa:** Se em algum momento o projeto decidir não versionar logs, adicione ao `.gitignore`:
+```gitignore
+# Prompt logs (desabilitar versionamento)
+.kiro/prompt-logs/
+```
+
+### Documentação Completa
+
+Para mais detalhes sobre o sistema de prompt logging, incluindo arquitetura, limitações e troubleshooting, consulte:
+
+📖 **[docs/prompt-logging.md](docs/prompt-logging.md)**
+
+---
+
+## 📦 Instalação de Dependências
+
+### Python
+
+O projeto utiliza Python para o backend e scripts auxiliares. Para instalar as dependências necessárias:
+
+```bash
+pip install -r requirements.txt
+```
+
+**Dependências principais:**
+- `pytz>=2024.1` - Biblioteca para manipulação de fusos horários (necessária para logging com horário de Brasília e sistema de prompt logging)
+
+---
+
 ## 🧩 Como Implementar
 
 ### Backend
