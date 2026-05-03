@@ -1,0 +1,104 @@
+name: 🐛 Bug Report
+description: Reportar um bug ou comportamento incorreto
+title: "fix: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐛 Reportar Bug
+        Obrigado por ajudar a melhorar o FundamentAI! Preencha os campos abaixo para reportar um bug.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição do Bug
+      description: Descreva claramente o comportamento incorreto
+      placeholder: O que está acontecendo de errado?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Passos para Reproduzir
+      description: Como reproduzir o bug?
+      placeholder: |
+        1. Acesse a página...
+        2. Clique em...
+        3. Observe que...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Comportamento Esperado
+      description: O que deveria acontecer?
+      placeholder: Descreva o comportamento correto esperado
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Comportamento Atual
+      description: O que está acontecendo atualmente?
+      placeholder: Descreva o comportamento incorreto observado
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Ambiente
+      description: Informações sobre o ambiente onde o bug ocorre
+      placeholder: |
+        - OS: [ex: macOS 13.0, Ubuntu 22.04]
+        - Browser: [ex: Chrome 120, Firefox 121]
+        - Python: [ex: 3.11.5]
+        - Node.js: [ex: 20.10.0]
+      render: markdown
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs/Screenshots
+      description: Adicione logs de erro ou screenshots relevantes
+      placeholder: Cole logs ou arraste imagens aqui
+    validations:
+      required: false
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severidade
+      description: Qual o impacto deste bug?
+      options:
+        - 🔴 Crítico (Sistema não funciona)
+        - 🟡 Alto (Funcionalidade importante quebrada)
+        - 🟢 Médio (Funcionalidade secundária afetada)
+        - 🔵 Baixo (Problema cosmético)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Componente Afetado
+      description: Qual parte do sistema está afetada?
+      options:
+        - Backend - Coletores
+        - Backend - Processadores
+        - Backend - API
+        - Backend - ETL
+        - Frontend - Componentes
+        - Frontend - Páginas
+        - Frontend - Serviços
+        - Banco de Dados
+        - Infraestrutura
+        - Outro
+    validations:
+      required: true

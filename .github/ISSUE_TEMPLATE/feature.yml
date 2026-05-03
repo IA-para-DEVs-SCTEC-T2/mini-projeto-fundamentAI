@@ -1,0 +1,98 @@
+name: 🚀 Feature Request
+description: Propor uma nova funcionalidade para o projeto
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🚀 Nova Funcionalidade
+        Obrigado por contribuir com o FundamentAI! Preencha os campos abaixo para propor uma nova funcionalidade.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto
+      description: Por que essa funcionalidade é necessária? Qual problema ela resolve?
+      placeholder: |
+        Descreva o contexto e a motivação para esta funcionalidade.
+        Exemplo: "Investidores precisam comparar múltiplas ações simultaneamente..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Escopo
+      description: O que deve ser implementado?
+      placeholder: |
+        - Item 1
+        - Item 2
+        - Item 3
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Critérios de Aceite
+      description: Como validar que a funcionalidade está completa?
+      placeholder: |
+        - [ ] Critério 1
+        - [ ] Critério 2
+        - [ ] Critério 3
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependências
+      description: Esta funcionalidade depende de outras issues?
+      placeholder: |
+        - #123
+        - #456
+    validations:
+      required: false
+
+  - type: textarea
+    id: references
+    attributes:
+      label: Referências
+      description: Links para documentação, steering files, ou recursos externos
+      placeholder: |
+        - `.kiro/steering/product.md`
+        - `.kiro/steering/tech.md`
+    validations:
+      required: false
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Categoria
+      description: Qual camada do sistema esta funcionalidade afeta?
+      options:
+        - Backend - Coletores
+        - Backend - Processadores
+        - Backend - API
+        - Backend - ETL
+        - Frontend - Componentes
+        - Frontend - Páginas
+        - Frontend - Serviços
+        - Infraestrutura
+        - Documentação
+        - Outro
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Prioridade
+      description: Qual a prioridade desta funcionalidade?
+      options:
+        - 🔴 Alta (Bloqueante)
+        - 🟡 Média (Importante)
+        - 🟢 Baixa (Nice to have)
+    validations:
+      required: true
