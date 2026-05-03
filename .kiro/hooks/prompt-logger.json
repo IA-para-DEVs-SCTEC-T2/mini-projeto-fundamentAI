@@ -1,0 +1,9 @@
+{
+  "id": "prompt-logger",
+  "name": "Prompt Logger",
+  "description": "Registra automaticamente prompts executados no Kiro, organizados por branch Git",
+  "eventType": "promptSubmit",
+  "hookAction": "runCommand",
+  "command": "python3 .kiro/scripts/log_prompt.py",
+  "timeout": 5
+}
