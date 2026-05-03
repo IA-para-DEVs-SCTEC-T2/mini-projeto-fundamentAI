@@ -1,7 +1,8 @@
 {
+  "enabled": true,
   "name": "Prompt Logger",
-  "version": "1.0.0",
   "description": "Registra automaticamente prompts executados no Kiro, organizados por branch Git",
+  "version": "1",
   "when": {
     "type": "promptSubmit"
   },

@@ -137,9 +137,9 @@ def get_prompt_content():
     Tenta capturar o conteúdo do prompt usando múltiplas estratégias.
     
     Estratégias (em ordem de prioridade):
-    1. Argumentos de linha de comando (sys.argv)
-    2. Variável de ambiente KIRO_PROMPT (se disponível)
-    3. Leitura de stdin (se não for TTY e houver conteúdo)
+    1. Variável de ambiente USER_PROMPT (padrão do Kiro)
+    2. Variável de ambiente KIRO_PROMPT (alternativa)
+    3. Argumentos de linha de comando (sys.argv)
     4. Retorna None se nenhuma estratégia funcionar (será filtrado)
     
     Returns:
@@ -150,17 +150,15 @@ def get_prompt_content():
         expõe informações aos hooks. Se nenhuma estratégia funcionar,
         retorna None para que o log seja filtrado.
     """
-    # Estratégia 1: Argumentos de linha de comando
+    # Estratégia 1: Variável de ambiente USER_PROMPT (padrão do Kiro)
     try:
-        if len(sys.argv) > 1:
-            # Junta todos os argumentos (exceto o nome do script)
-            prompt = ' '.join(sys.argv[1:]).strip()
-            if prompt:
-                return prompt
+        prompt = os.environ.get('USER_PROMPT')
+        if prompt and prompt.strip():
+            return prompt.strip()
     except Exception:
         pass
     
-    # Estratégia 2: Variável de ambiente KIRO_PROMPT
+    # Estratégia 2: Variável de ambiente KIRO_PROMPT (alternativa)
     try:
         prompt = os.environ.get('KIRO_PROMPT')
         if prompt and prompt.strip():
@@ -168,10 +166,11 @@ def get_prompt_content():
     except Exception:
         pass
     
-    # Estratégia 3: Leitura de stdin (se não for TTY)
+    # Estratégia 3: Argumentos de linha de comando
     try:
-        if not sys.stdin.isatty():
-            prompt = sys.stdin.read().strip()
+        if len(sys.argv) > 1:
+            # Junta todos os argumentos (exceto o nome do script)
+            prompt = ' '.join(sys.argv[1:]).strip()
             if prompt:
                 return prompt
     except Exception:
