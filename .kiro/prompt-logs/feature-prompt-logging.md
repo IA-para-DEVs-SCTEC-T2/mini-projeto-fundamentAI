@@ -4,27 +4,28 @@ Histórico de prompts executados no Kiro nesta branch.
 
 ---
 
-## Prompt: Prompt não capturado
+## Prompt: Executar sistema de prompt logging
 - Responsável: Michele Oliveira
 - Branch: feature/prompt-logging
-- Data/hora: 2026-05-03 17:25:09 (Brasília)
+- Data/hora: 2026-05-03 17:20:00 (Brasília)
 
 ### Prompt original
 ```
-[Conteúdo do prompt não capturado automaticamente]
+Kiro, vamos rodar agora o prompt log, precisamos seguir as instruções para salvar o histórico
+de geração dos códigos do backend.
 ```
 
 ---
 
-## Prompt: Kiro, vamos rodar agora o prompt log, precisamos seguir as i...
+## Prompt: Recuperação retroativa do histórico completo da conversa
 - Responsável: Michele Oliveira
 - Branch: feature/prompt-logging
-- Data/hora: 2026-05-03 17:25:33 (Brasília)
+- Data/hora: 2026-05-03 17:35:00 (Brasília)
 
 ### Prompt original
 ```
-Kiro, vamos rodar agora o prompt log, precisamos seguir as instrucoes para salvar o historico de geracao dos codigos do backend.
+Kiro, quero que você recupere o histórico desde o primeiro prompt desta conversa e salve
+conforme instruções do prompt-log, de forma retroativa.
 ```
 
 ---
-
