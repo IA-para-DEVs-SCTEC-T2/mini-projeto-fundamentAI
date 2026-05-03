@@ -137,40 +137,92 @@ def get_prompt_content():
     Tenta capturar o conteúdo do prompt usando múltiplas estratégias.
     
     Estratégias (em ordem de prioridade):
-    1. Variável de ambiente KIRO_PROMPT (se disponível)
-    2. Leitura de stdin (se não for TTY e houver conteúdo)
-    3. Placeholder se nenhuma estratégia funcionar
+    1. Argumentos de linha de comando (sys.argv)
+    2. Variável de ambiente KIRO_PROMPT (se disponível)
+    3. Leitura de stdin (se não for TTY e houver conteúdo)
+    4. Retorna None se nenhuma estratégia funcionar (será filtrado)
     
     Returns:
-        str: Conteúdo do prompt ou placeholder se não disponível.
+        str or None: Conteúdo do prompt ou None se não disponível.
     
     Nota:
         A disponibilidade do conteúdo do prompt depende de como o Kiro
         expõe informações aos hooks. Se nenhuma estratégia funcionar,
-        o sistema ainda registra os metadados (branch, usuário, timestamp).
+        retorna None para que o log seja filtrado.
     """
-    # Estratégia 1: Variável de ambiente KIRO_PROMPT
+    # Estratégia 1: Argumentos de linha de comando
+    try:
+        if len(sys.argv) > 1:
+            # Junta todos os argumentos (exceto o nome do script)
+            prompt = ' '.join(sys.argv[1:]).strip()
+            if prompt:
+                return prompt
+    except Exception:
+        pass
+    
+    # Estratégia 2: Variável de ambiente KIRO_PROMPT
     try:
         prompt = os.environ.get('KIRO_PROMPT')
         if prompt and prompt.strip():
             return prompt.strip()
     except Exception:
-        # Falha ao acessar variável de ambiente (improvável, mas tratamos)
         pass
     
-    # Estratégia 2: Leitura de stdin (se não for TTY)
+    # Estratégia 3: Leitura de stdin (se não for TTY)
     try:
-        # Verifica se stdin não é um terminal (ou seja, está recebendo dados)
         if not sys.stdin.isatty():
             prompt = sys.stdin.read().strip()
             if prompt:
                 return prompt
     except Exception:
-        # Falha ao ler stdin (pode acontecer se stdin estiver fechado)
         pass
     
-    # Estratégia 3: Placeholder (fallback)
-    return "[Conteúdo do prompt não capturado automaticamente]"
+    # Estratégia 4: Retorna None (será filtrado)
+    return None
+
+
+def is_trivial_prompt(content):
+    """
+    Verifica se o prompt é trivial e não deve ser registrado.
+    
+    Prompts triviais incluem:
+    - Confirmações simples (sim, não, ok, yes, no)
+    - Respostas muito curtas (< 10 caracteres)
+    - Comandos de navegação (next, back, continue)
+    - Conteúdo vazio ou None
+    
+    Args:
+        content (str or None): Conteúdo do prompt a ser verificado.
+    
+    Returns:
+        bool: True se o prompt é trivial, False caso contrário.
+    """
+    if content is None:
+        return True
+    
+    content_lower = content.lower().strip()
+    
+    # Lista de padrões triviais
+    trivial_patterns = [
+        # Confirmações
+        'sim', 'não', 'nao', 'ok', 'yes', 'no', 'y', 'n',
+        # Comandos de navegação
+        'next', 'back', 'continue', 'skip', 'cancel',
+        # Respostas curtas comuns
+        'done', 'finish', 'stop', 'start', 'run',
+        # Números isolados
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+    ]
+    
+    # Verifica se é exatamente um padrão trivial
+    if content_lower in trivial_patterns:
+        return True
+    
+    # Verifica se é muito curto (< 10 caracteres)
+    if len(content.strip()) < 10:
+        return True
+    
+    return False
 
 
 def sanitize_branch_name(branch):
@@ -289,10 +341,11 @@ def log_prompt():
     Orquestra todo o processo de captura e persistência de logs:
     1. Coleta metadados (branch, usuário, timestamp)
     2. Captura conteúdo do prompt
-    3. Determina arquivo de log apropriado
-    4. Cria diretório e arquivo se necessário
-    5. Adiciona cabeçalho na primeira entrada
-    6. Formata e persiste entrada de log
+    3. Filtra prompts triviais (confirmações, respostas curtas)
+    4. Determina arquivo de log apropriado
+    5. Cria diretório e arquivo se necessário
+    6. Adiciona cabeçalho na primeira entrada
+    7. Formata e persiste entrada de log
     
     Tratamento de erros:
         Esta função implementa tratamento de erros gracioso para garantir
@@ -301,6 +354,7 @@ def log_prompt():
     
     Fluxo de execução:
         - Sucesso: Log é persistido silenciosamente (sem output)
+        - Prompt trivial: Ignorado silenciosamente (sem log)
         - Falha: Mensagem de erro em stderr, execução continua normalmente
     
     Efeitos colaterais:
@@ -315,12 +369,17 @@ def log_prompt():
         timestamp = get_brasilia_timestamp()
         prompt_content = get_prompt_content()
         
-        # 2. Determina caminho do arquivo de log
+        # 2. Filtra prompts triviais
+        if is_trivial_prompt(prompt_content):
+            # Ignora silenciosamente - não registra prompts triviais
+            return
+        
+        # 3. Determina caminho do arquivo de log
         sanitized_branch = sanitize_branch_name(branch)
         log_dir = '.kiro/prompt-logs'
         log_file = os.path.join(log_dir, f'{sanitized_branch}.md')
         
-        # 3. Cria diretório se não existir
+        # 4. Cria diretório se não existir
         try:
             os.makedirs(log_dir, exist_ok=True)
         except OSError as e:
@@ -328,7 +387,7 @@ def log_prompt():
             print(f"[Prompt Logger] Erro ao criar diretório {log_dir}: {e}", file=sys.stderr)
             return
         
-        # 4. Adiciona cabeçalho se arquivo não existir
+        # 5. Adiciona cabeçalho se arquivo não existir
         file_is_new = not os.path.exists(log_file)
         
         if file_is_new:
@@ -342,10 +401,10 @@ def log_prompt():
                 print(f"[Prompt Logger] Erro ao criar arquivo {log_file}: {e}", file=sys.stderr)
                 return
         
-        # 5. Formata entrada de log
+        # 6. Formata entrada de log
         entry = format_log_entry(branch, user, timestamp, prompt_content)
         
-        # 6. Adiciona entrada ao arquivo (modo append)
+        # 7. Adiciona entrada ao arquivo (modo append)
         try:
             with open(log_file, 'a', encoding='utf-8') as f:
                 f.write(entry)

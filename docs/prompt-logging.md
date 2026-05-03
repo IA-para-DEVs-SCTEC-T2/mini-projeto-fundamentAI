@@ -261,11 +261,23 @@ Isso permite entender:
 
 **Sintoma:** Logs contêm `[Conteúdo do prompt não capturado automaticamente]`
 
-**Causa:** Esta é uma **limitação conhecida**. O Kiro pode não expor o conteúdo completo do prompt via hooks.
+**Causa:** Esta é uma **limitação conhecida**. O Kiro pode não expor o conteúdo completo do prompt via hooks do tipo `promptSubmit`.
 
-**Impacto:** Os metadados (branch, usuário, timestamp) ainda são registrados corretamente.
+**Impacto:** Quando o conteúdo não pode ser capturado, o prompt é **ignorado automaticamente** para evitar poluir os logs com entradas vazias.
 
-**Solução:** Não há solução no momento. Esta é uma limitação da API de hooks do Kiro. Os metadados ainda fornecem rastreabilidade valiosa.
+**Solução:** Não há solução no momento. Esta é uma limitação da API de hooks do Kiro. O sistema filtra automaticamente prompts sem conteúdo.
+
+### Problema: Confirmações triviais sendo registradas
+
+**Sintoma:** Logs contêm entradas para confirmações simples como "sim", "ok", "run"
+
+**Causa:** Versão anterior não filtrava prompts triviais.
+
+**Solução:** **Já corrigido!** O sistema agora filtra automaticamente:
+- Confirmações simples (sim, não, ok, yes, no)
+- Respostas muito curtas (< 10 caracteres)
+- Comandos de navegação (next, back, continue)
+- Prompts sem conteúdo capturado
 
 ### Problema: Erro ao executar o script
 
@@ -330,13 +342,26 @@ Isso permite entender:
 
 ### 1. Captura de Conteúdo do Prompt
 
-**Limitação:** O Kiro pode não expor o conteúdo completo do prompt via hooks.
+**Limitação:** O Kiro pode não expor o conteúdo completo do prompt via hooks do tipo `promptSubmit`.
 
 **Impacto:**
-- Logs podem conter apenas metadados (branch, usuário, timestamp)
-- Placeholder `[Conteúdo do prompt não capturado automaticamente]` é usado
+- Prompts sem conteúdo capturado são **automaticamente filtrados**
+- Não gera entradas vazias nos logs
+- Sistema prioriza qualidade sobre quantidade
 
-**Status:** Limitação da API de hooks do Kiro. Metadados ainda fornecem rastreabilidade.
+**Status:** Limitação da API de hooks do Kiro. Sistema implementa filtragem automática para evitar poluição dos logs.
+
+### 2. Filtragem de Prompts Triviais
+
+**Comportamento:** O sistema filtra automaticamente prompts triviais para manter logs limpos e relevantes.
+
+**Prompts filtrados:**
+- Confirmações simples: "sim", "não", "ok", "yes", "no"
+- Respostas muito curtas: menos de 10 caracteres
+- Comandos de navegação: "next", "back", "continue"
+- Prompts sem conteúdo capturado
+
+**Justificativa:** Logs devem conter apenas interações significativas com o Kiro, não confirmações triviais.
 
 ### 2. Resumo de Resultados
 
@@ -370,21 +395,23 @@ Isso permite entender:
 
 ## Boas Práticas
 
-### 1. Revisar Logs Antes de Commits
-
-Antes de fazer commit, revise os logs para garantir que não contêm informações sensíveis:
-
-```bash
-git diff .kiro/prompt-logs/
-```
-
-### 2. Não Incluir Dados Sensíveis em Prompts
+### 1. Não Incluir Dados Sensíveis em Prompts
 
 Evite incluir em prompts:
 - ❌ Tokens de API
 - ❌ Senhas
 - ❌ Chaves privadas
 - ❌ Dados pessoais sensíveis
+
+**Importante:** Prompts são versionados no Git. Dados sensíveis podem vazar no histórico.
+
+### 2. Revisar Logs Antes de Commits
+
+Antes de fazer commit, revise os logs para garantir que não contêm informações sensíveis:
+
+```bash
+git diff .kiro/prompt-logs/
+```
 
 ### 3. Usar Logs em Code Reviews
 
