@@ -347,4 +347,58 @@ Contexto macro
 
 ---
 
+## 🤝 Como Contribuir
+
+Contribuições são bem-vindas! Para manter a qualidade e consistência do projeto, siga estas diretrizes:
+
+### Reportar Bugs ou Propor Funcionalidades
+
+Use os **templates de issues** disponíveis:
+
+1. Acesse [Issues](https://github.com/IA-para-DEVs-SCTEC-T2/mini-projeto-fundamentAI/issues/new/choose)
+2. Escolha o template apropriado:
+   - 🚀 **Feature Request** — Para novas funcionalidades
+   - 🐛 **Bug Report** — Para reportar bugs
+   - 📚 **Documentation** — Para melhorias na documentação
+   - 🔧 **Chore/Maintenance** — Para tarefas de manutenção
+   - 💬 **General Issue** — Para outros assuntos
+3. Preencha todos os campos obrigatórios
+
+### Contribuir com Código
+
+1. **Fork** o repositório
+2. Crie uma **branch** seguindo as convenções em `.kiro/steering/gitflow.md`:
+   ```bash
+   git checkout -b feature/nome-da-funcionalidade
+   ```
+3. Faça commits seguindo **Conventional Commits**:
+   ```bash
+   git commit -m "feat(escopo): descrição da mudança"
+   ```
+4. **Push** para seu fork:
+   ```bash
+   git push origin feature/nome-da-funcionalidade
+   ```
+5. Abra uma **Pull Request** usando o template automático
+6. Aguarde revisão e aprovação
+
+### Convenções do Projeto
+
+- **Git Flow**: `.kiro/steering/gitflow.md`
+- **Estrutura**: `.kiro/steering/structure.md`
+- **Stack Técnica**: `.kiro/steering/tech.md`
+- **Produto**: `.kiro/steering/product.md`
+
+### Templates
+
+Todos os templates estão documentados em [`.github/README.md`](.github/README.md).
+
+---
+
+## 📋 Backlog e Roadmap
+
+Acompanhe o progresso do projeto no [Project Board](https://github.com/orgs/IA-para-DEVs-SCTEC-T2/projects/8).
+
+---
+
 *Projeto em desenvolvimento. Contribuições e sugestões são bem-vindas.*

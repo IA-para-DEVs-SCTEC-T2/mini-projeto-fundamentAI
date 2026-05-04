@@ -1,0 +1,20 @@
+[
+  {
+    "title": "setup: configurar estrutura inicial do projeto",
+    "labels": [
+      "setup",
+      "backend",
+      "frontend"
+    ],
+    "body": "## Contexto\nCriar a estrutura base do projeto FundamentAI conforme definido em `.kiro/steering/structure.md`. Esta é a fundação sobre a qual todo o sistema será construído.\n\n## Escopo\n- Criar estrutura de diretórios do backend (collectors/, processors/, etl/, prompts/, api/, db/, tests/)\n- Criar estrutura de diretórios do frontend (src/components/, src/pages/, src/services/, src/hooks/, src/utils/)\n- Configurar ambiente Python com `requirements.txt` inicial\n- Configurar ambiente React com `package.json` e dependências base\n- Configurar `.gitignore` adequado para Python e React\n- Criar arquivos README.md em diretórios principais\n\n## Critérios de Aceite\n- [ ] Estrutura de diretórios do backend criada conforme `structure.md`\n- [ ] Estrutura de diretórios do frontend criada conforme `structure.md`\n- [ ] `requirements.txt` com dependências base (FastAPI, SQLAlchemy, pandas, yfinance, anthropic)\n- [ ] `package.json` com dependências base (React, React Router, Axios)\n- [ ] `.gitignore` configurado para não versionar `node_modules/`, `__pycache__/`, `.env`, etc.\n- [ ] Projeto pode ser inicializado localmente (backend e frontend)\n\n## Dependências\n- nenhuma\n\n## Referências\n- `.kiro/steering/structure.md`\n- `.kiro/steering/tech.md`"
+  },
+  {
+    "title": "setup: configurar banco de dados e ORM",
+    "labels": [
+      "setup",
+      "backend",
+      "database"
+    ],
+    "body": "## Contexto\nConfigurar a camada de persistência de dados usando SQLAlchemy como ORM, com suporte para SQLite (desenvolvimento) e PostgreSQL (produção).\n\n## Escopo\n- Criar modelos de dados em `backend/db/models.py` para armazenar dados financeiros, indicadores e análises\n- Implementar repository pattern em `backend/db/repository.py` para abstração de acesso aos dados\n- Configurar conexão com banco de dados (SQLite local por padrão)\n- Criar migrations iniciais\n- Implementar funções CRUD básicas\n\n## Critérios de Aceite\n- [ ] Modelos SQLAlchemy criados para: Ticker, FinancialData, Indicators, Analysis\n- [ ] Repository implementado com métodos CRUD\n- [ ] Conexão com SQLite funcional\n- [ ] Código preparado para migração futura para PostgreSQL (uso de variáveis de ambiente)\n- [ ] Migrations funcionando corretamente\n- [ ] Testes básicos de persistência passando\n\n## Dependências\n- #1\n\n## Referências\n- `.kiro/steering/tech.md` (seção Backend - SQLAlchemy)\n- `.kiro/steering/structure.md` (seção backend/db/)"
+  }
+]
