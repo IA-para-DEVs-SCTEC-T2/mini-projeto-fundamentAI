@@ -358,6 +358,76 @@ sudo apt-get install python3-dev libopenblas-dev
 
 ---
 
+## 📝 Prompt Logging
+
+Este projeto implementa um sistema automático de **logging de prompts** executados no Kiro, organizado por branch Git. O objetivo é manter rastreabilidade completa das interações com o agente durante o desenvolvimento.
+
+### Como Funciona
+
+Sempre que você submete um prompt ao Kiro, o sistema automaticamente:
+
+- Registra o conteúdo do prompt
+- Captura metadados (branch, responsável, data/hora)
+- Salva em arquivo Markdown específico da branch
+- Mantém histórico incremental e versionável
+
+### Estrutura de Logs
+
+```
+.kiro/prompt-logs/
+├── main.md                 # Logs da branch main
+├── develop.md              # Logs da branch develop
+├── feature-auth.md         # Logs de feature/auth
+└── bugfix-crash-fix.md     # Logs de bugfix/crash-fix
+```
+
+### Consulta de Logs
+
+**Ver logs de uma branch:**
+```bash
+cat .kiro/prompt-logs/<branch-name>.md
+```
+
+**Últimas entradas:**
+```bash
+tail -n 50 .kiro/prompt-logs/<branch-name>.md
+```
+
+**Buscar por palavra-chave:**
+```bash
+grep -A 10 "palavra-chave" .kiro/prompt-logs/<branch-name>.md
+```
+
+### Versionamento de Logs
+
+**Decisão:** Os arquivos de log de prompts **são versionados no Git** por padrão.
+
+**Justificativa:**
+- **Rastreabilidade:** Facilita code reviews ao permitir que revisores entendam o contexto das decisões tomadas durante o desenvolvimento
+- **Documentação:** Preserva o histórico completo do processo de desenvolvimento para referência futura
+- **Compartilhamento de conhecimento:** Permite que membros da equipe aprendam com as interações anteriores
+- **Auditoria:** Mantém registro completo das interações com o agente Kiro
+
+**Considerações:**
+- Os logs contêm apenas informações do projeto (prompts, metadados de Git)
+- Não contêm dados sensíveis (tokens, senhas, chaves de API)
+- O formato Markdown facilita diffs legíveis no Git
+- Arquivos crescem incrementalmente, mas permanecem em formato texto
+
+**Alternativa:** Se em algum momento o projeto decidir não versionar logs, adicione ao `.gitignore`:
+```gitignore
+# Prompt logs (desabilitar versionamento)
+.kiro/prompt-logs/
+```
+
+### Documentação Completa
+
+Para mais detalhes sobre o sistema de prompt logging, incluindo arquitetura, limitações e troubleshooting, consulte:
+
+📖 **[docs/prompt-logging.md](docs/prompt-logging.md)**
+
+---
+
 ## 🧩 Como Implementar
 
 ### Backend
@@ -410,6 +480,60 @@ Contexto macro
 📚 Explicação didática
 🔍 Conclusão com nível de confiança
 ```
+
+---
+
+## 🤝 Como Contribuir
+
+Contribuições são bem-vindas! Para manter a qualidade e consistência do projeto, siga estas diretrizes:
+
+### Reportar Bugs ou Propor Funcionalidades
+
+Use os **templates de issues** disponíveis:
+
+1. Acesse [Issues](https://github.com/IA-para-DEVs-SCTEC-T2/mini-projeto-fundamentAI/issues/new/choose)
+2. Escolha o template apropriado:
+   - 🚀 **Feature Request** — Para novas funcionalidades
+   - 🐛 **Bug Report** — Para reportar bugs
+   - 📚 **Documentation** — Para melhorias na documentação
+   - 🔧 **Chore/Maintenance** — Para tarefas de manutenção
+   - 💬 **General Issue** — Para outros assuntos
+3. Preencha todos os campos obrigatórios
+
+### Contribuir com Código
+
+1. **Fork** o repositório
+2. Crie uma **branch** seguindo as convenções em `.kiro/steering/gitflow.md`:
+   ```bash
+   git checkout -b feature/nome-da-funcionalidade
+   ```
+3. Faça commits seguindo **Conventional Commits**:
+   ```bash
+   git commit -m "feat(escopo): descrição da mudança"
+   ```
+4. **Push** para seu fork:
+   ```bash
+   git push origin feature/nome-da-funcionalidade
+   ```
+5. Abra uma **Pull Request** usando o template automático
+6. Aguarde revisão e aprovação
+
+### Convenções do Projeto
+
+- **Git Flow**: `.kiro/steering/gitflow.md`
+- **Estrutura**: `.kiro/steering/structure.md`
+- **Stack Técnica**: `.kiro/steering/tech.md`
+- **Produto**: `.kiro/steering/product.md`
+
+### Templates
+
+Todos os templates estão documentados em [`.github/README.md`](.github/README.md).
+
+---
+
+## 📋 Backlog e Roadmap
+
+Acompanhe o progresso do projeto no [Project Board](https://github.com/orgs/IA-para-DEVs-SCTEC-T2/projects/8).
 
 ---
 

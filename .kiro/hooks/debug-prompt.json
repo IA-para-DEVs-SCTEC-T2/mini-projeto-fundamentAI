@@ -1,0 +1,12 @@
+{
+  "name": "Debug Prompt Hook",
+  "version": "1.0.0",
+  "description": "Debug hook para capturar informações do promptSubmit",
+  "when": {
+    "type": "promptSubmit"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "python3 .kiro/scripts/log_prompt_debug.py"
+  }
+}
