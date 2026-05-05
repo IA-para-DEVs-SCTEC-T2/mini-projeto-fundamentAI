@@ -207,6 +207,139 @@ Os arquivos de steering em `.kiro/steering/` definem o contexto permanente injet
 
 ---
 
+## 🚀 Instalação e Configuração
+
+### Pré-requisitos
+
+- Python 3.8 ou superior
+- pip (gerenciador de pacotes Python)
+- Node.js 16+ e npm (para o frontend, quando implementado)
+- Git
+
+### 1️⃣ Clonar o Repositório
+
+```bash
+git clone https://github.com/IA-para-DEVs-SCTEC-T2/FundamentAI.git
+cd FundamentAI
+```
+
+### 2️⃣ Configurar Backend
+
+#### Instalar Dependências
+
+```bash
+cd backend
+pip install -r requirements.txt
+```
+
+**Recomendação:** Usar ambiente virtual para isolar dependências:
+
+```bash
+# Criar ambiente virtual
+python -m venv venv
+
+# Ativar ambiente virtual
+# No macOS/Linux:
+source venv/bin/activate
+# No Windows:
+venv\Scripts\activate
+
+# Instalar dependências
+pip install -r requirements.txt
+```
+
+#### Configurar Variáveis de Ambiente
+
+1. Copiar o arquivo de exemplo:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Editar `.env` e preencher as variáveis necessárias:
+   ```bash
+   # Obrigatório: chave da API da Anthropic
+   ANTHROPIC_API_KEY=sua_chave_aqui
+   
+   # Opcional: ajustar configurações de banco e API
+   DATABASE_URL=sqlite:///./fundamentai.db
+   API_PORT=8000
+   ```
+
+3. **Obter chave da Anthropic:**
+   - Criar conta em [console.anthropic.com](https://console.anthropic.com)
+   - Gerar API key em "API Keys"
+   - Copiar e colar no arquivo `.env`
+
+#### Verificar Instalação
+
+```bash
+# Testar importações
+python -c "import fastapi, anthropic, yfinance, pandas; print('✅ Dependências instaladas com sucesso!')"
+```
+
+### 3️⃣ Configurar Frontend *(quando implementado)*
+
+```bash
+cd frontend
+npm install
+```
+
+### 4️⃣ Executar o Projeto
+
+#### Backend (API)
+
+```bash
+cd backend
+uvicorn api.main:app --reload
+```
+
+A API estará disponível em `http://localhost:8000`
+
+#### Frontend *(quando implementado)*
+
+```bash
+cd frontend
+npm start
+```
+
+### 🔍 Estrutura de Dependências
+
+| Dependência | Versão | Finalidade |
+|---|---|---|
+| `fastapi` | 0.115.12 | Framework da API REST |
+| `uvicorn` | 0.34.2 | Servidor ASGI |
+| `sqlalchemy` | 2.0.40 | ORM para banco de dados |
+| `yfinance` | 0.2.61 | Coleta de dados financeiros |
+| `fundamentus` | 0.3.2 | Indicadores fundamentalistas B3 |
+| `anthropic` | 0.52.0 | Geração de análises via LLM |
+| `pandas` | ≥2.3.0 | Processamento de dados |
+| `apscheduler` | 3.10.4 | Agendamento do ETL |
+| `python-dotenv` | 1.0.1 | Gerenciamento de variáveis de ambiente |
+
+### ⚠️ Troubleshooting
+
+**Erro ao instalar `yfinance`:**
+```bash
+pip install --upgrade pip
+pip install yfinance --no-cache-dir
+```
+
+**Erro ao instalar `pandas` ou `numpy`:**
+```bash
+# Instalar dependências de sistema (macOS)
+brew install openblas
+
+# Instalar dependências de sistema (Ubuntu/Debian)
+sudo apt-get install python3-dev libopenblas-dev
+```
+
+**Erro "ANTHROPIC_API_KEY not found":**
+- Verificar se o arquivo `.env` existe na raiz do projeto
+- Verificar se a variável está preenchida corretamente
+- Reiniciar o servidor após alterar o `.env`
+
+---
+
 ## 🧩 Como Implementar
 
 ### Backend
