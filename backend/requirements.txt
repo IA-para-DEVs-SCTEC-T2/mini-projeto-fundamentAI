@@ -12,11 +12,11 @@ sqlalchemy==2.0.40
 # --- Coleta de Dados ---
 yfinance==0.2.61
 fundamentus==0.3.2
-requests>=2.28.0
+requests==2.32.3
 
 # --- Processamento ---
-pandas>=2.3.0
-numpy>=2.0.0
+pandas==2.3.0
+numpy==2.0.2
 
 # --- LLM ---
 anthropic==0.52.0

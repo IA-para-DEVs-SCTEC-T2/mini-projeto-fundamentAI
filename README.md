@@ -312,7 +312,9 @@ npm start
 | `yfinance` | 0.2.61 | Coleta de dados financeiros |
 | `fundamentus` | 0.3.2 | Indicadores fundamentalistas B3 |
 | `anthropic` | 0.52.0 | Geração de análises via LLM |
-| `pandas` | ≥2.3.0 | Processamento de dados |
+| `pandas` | 2.3.0 | Processamento de dados |
+| `numpy` | 2.0.2 | Computação numérica |
+| `requests` | 2.32.3 | Cliente HTTP |
 | `apscheduler` | 3.10.4 | Agendamento do ETL |
 | `python-dotenv` | 1.0.1 | Gerenciamento de variáveis de ambiente |
 
