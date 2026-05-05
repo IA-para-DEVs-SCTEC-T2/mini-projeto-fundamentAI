@@ -288,12 +288,28 @@ npm install
 
 #### Backend (API)
 
+**Importante:** Sempre ative o ambiente virtual antes de executar:
+
 ```bash
 cd backend
+
+# Ativar ambiente virtual
+# No macOS/Linux:
+source venv/bin/activate
+
+# No Windows:
+venv\Scripts\activate
+
+# Executar a API
 uvicorn api.main:app --reload
 ```
 
 A API estará disponível em `http://localhost:8000`
+
+**Para desativar o ambiente virtual:**
+```bash
+deactivate
+```
 
 #### Frontend *(quando implementado)*
 
@@ -314,7 +330,7 @@ npm start
 | `anthropic` | 0.52.0 | Geração de análises via LLM |
 | `pandas` | 2.3.0 | Processamento de dados |
 | `numpy` | 2.0.2 | Computação numérica |
-| `requests` | 2.32.3 | Cliente HTTP |
+| `requests` | 2.32.4 | Cliente HTTP |
 | `apscheduler` | 3.10.4 | Agendamento do ETL |
 | `python-dotenv` | 1.0.1 | Gerenciamento de variáveis de ambiente |
 
