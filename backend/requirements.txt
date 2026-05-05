@@ -1,0 +1,34 @@
+# ============================================================
+# FundamentAI - Dependências do Backend
+# ============================================================
+
+# --- API ---
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+
+# --- Banco de Dados ---
+sqlalchemy==2.0.40
+
+# --- Coleta de Dados ---
+yfinance==0.2.61
+fundamentus==0.3.2
+requests==2.32.4
+
+# --- Processamento ---
+pandas==2.3.0
+numpy==2.0.2
+
+# --- LLM ---
+anthropic==0.52.0
+
+# --- Agendamento ETL ---
+apscheduler==3.10.4
+
+# --- Utilitários ---
+python-dotenv==1.0.1
+pytz==2025.2
+
+# --- Desenvolvimento / Testes ---
+pytest==8.3.5
+pytest-asyncio==0.25.3
+httpx==0.28.1

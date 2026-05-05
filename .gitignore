@@ -147,10 +147,15 @@ activemq-data/
 # SageMath parsed files
 *.sage.py
 
+# SQLite database (desenvolvimento local)
+*.db
+*.sqlite3
+
 # Environments
 .env
 .envrc
 .venv
+venv/
 env/
 venv/
 ENV/
