@@ -150,6 +150,7 @@ activemq-data/
 # SQLite database (desenvolvimento local)
 *.db
 *.sqlite3
+*.sqlite
 
 # Environments
 .env

@@ -15,8 +15,8 @@ fundamentus==0.3.2
 requests==2.32.4
 
 # --- Processamento ---
-pandas==2.3.0
-numpy==2.0.2
+pandas>=2.2.0
+numpy>=2.1.0
 
 # --- LLM ---
 anthropic==0.52.0
