@@ -48,36 +48,52 @@ Criar uma plataforma que:
 
 ## 🧠 Critérios de Análise (Baseados em Dados)
 
-### 📈 Crescimento Sustentável
+O sistema aplica indicadores **específicos por tipo de ativo**, mas entrega um **output unificado** para ações e FIIs — garantindo consistência no frontend.
 
-- Crescimento anual de receita e lucro líquido ≥ 10%
-- Consistência nos últimos 5 anos
-- Comparação com empresas do mesmo setor
+### 📈 Para Ações (Empresas da B3)
 
-### 💰 Indicadores Fundamentalistas
+Foco em eficiência operacional, lucratividade e endividamento.
 
-| Indicador | Descrição |
+| Indicador | Descrição | Peso no Score |
+|---|---|---|
+| P/L | Quanto o mercado paga por R$1 de lucro | 15% |
+| ROE | Retorno sobre Patrimônio Líquido | 20% |
+| Dívida Líquida / EBITDA | Nível de alavancagem financeira | 15% |
+| Margem Líquida | Eficiência na geração de lucro | 15% |
+| EV/EBITDA | Valor da empresa sobre geração de caixa | 10% |
+| Dividend Yield | Rendimento distribuído / preço | 10% |
+| Crescimento Lucro YoY | CAGR do lucro líquido (histórico 5 anos) | 15% |
+
+**Fonte:** fundamentus (principal) + yfinance (histórico DRE)
+
+### 🏢 Para FIIs (Fundos de Investimento Imobiliário)
+
+Foco em geração de renda e valor dos ativos.
+
+| Indicador | Descrição | Peso no Score |
+|---|---|---|
+| P/VP | Desconto ou prêmio sobre o patrimônio | 30% |
+| P/L | Preço sobre rendimento | 15% |
+| Dividend Yield | Rendimento distribuído / preço da cota | 35% |
+| Crescimento Dividendos YoY | CAGR dos dividendos anuais | 20% |
+
+**Fonte:** yfinance (exclusivo)
+
+### 🏆 Score Fundamentalista (Output Unificado)
+
+| Score | Classificação |
 |---|---|
-| ROE | Retorno sobre Patrimônio |
-| ROIC | Retorno sobre Capital Investido |
-| Margem líquida | Eficiência na geração de lucro |
-| Dívida líquida / EBITDA | Nível de alavancagem |
-| P/L | Preço / Lucro |
-| P/VP | Preço / Valor Patrimonial |
+| 75 – 100 | Excelente |
+| 50 – 74 | Bom |
+| 25 – 49 | Regular |
+| 0 – 24 | Fraco |
 
 ### 🏦 Dados Macroeconômicos
 
-- SELIC
-- IPCA
+Injetados no contexto de análise da LLM:
 
-### 📊 Análises Complementares
-
-- Estrutura de capital
-- Eficiência operacional
-- Comparação setorial
-- Tendências históricas
-
-> Notícias podem ser consideradas, mas com peso reduzido.
+- **SELIC** — taxa básica de juros (BCB/SGS série 11)
+- **IPCA** — inflação acumulada 12 meses (BCB/SGS série 433)
 
 ---
 
@@ -109,10 +125,13 @@ Retorno em formato estruturado otimizado para renderização no frontend
 
 ### 🔌 Fontes de Dados
 
-- `yfinance`
-- `fundamentus`
-- API do Banco Central (SELIC, IPCA)
-- *(Possível expansão: API oficial da B3)*
+| Fonte | Tipo de Ativo | Dados fornecidos |
+|---|---|---|
+| `fundamentus` | Ações | P/L, P/VP, ROE, ROIC, Margem, EV/EBITDA, DY, balanço |
+| `yfinance` | Ações + FIIs | Cotações, histórico de preços, DRE histórico, dados de FIIs |
+| API Banco Central | Ambos | SELIC e IPCA |
+
+> **FIIs:** fundamentus não suporta FIIs. yfinance é a fonte exclusiva para fundos imobiliários.
 
 ---
 
@@ -140,14 +159,82 @@ O prompt define explicitamente o **formato de saída** (estruturado) para garant
 
 ---
 
-## 🖥️ Funcionalidades
+## �️ Banco de Dados
 
-- Consulta por ticker (ações e FIIs)
-- Score fundamentalista
-- Visualização de gráficos
-- Comparação com setor
-- Explicação simplificada de DRE e balanços
-- Atualização diária (pós-fechamento do mercado)
+O sistema usa **SQLite** em desenvolvimento e **PostgreSQL** em produção, gerenciado via SQLAlchemy.
+
+### Tabelas
+
+| Tabela | Descrição |
+|---|---|
+| `tickers` | Ativos ativos (ações e FIIs) com tipo e setor |
+| `inactive_tickers` | Tickers inativos — excluídos da análise |
+| `financial_data` | Dados financeiros brutos por data de referência |
+| `indicators` | Indicadores calculados por data de referência |
+| `analyses` | Análises geradas pela LLM |
+
+### Campo `asset_type`
+
+Presente em `tickers` e `inactive_tickers`. Identifica o tipo do ativo:
+
+| Valor | Tipo |
+|---|---|
+| `"stock"` | Ação (empresa da B3) |
+| `"fii"` | Fundo de Investimento Imobiliário |
+
+A classificação é automática: tickers terminados em `11` são FIIs (ex: HGLG11), os demais são ações.
+
+### Popular o banco
+
+```bash
+# Popula com todos os ~993 tickers da B3 (retoma de onde parou)
+python -m backend.scripts.populate_all_tickers
+
+# Atualiza CAGR de lucro via yfinance (ações)
+python -m backend.scripts.update_income_growth
+
+# Verifica e enriquece tickers com < 3 indicadores (executado automaticamente pelo ETL)
+python -m backend.scripts.ensure_min_indicators
+
+# Limpeza trimestral conforme política de retenção de dados
+python -m backend.scripts.data_retention_cleanup --dry-run  # apenas relatório
+python -m backend.scripts.data_retention_cleanup            # executa limpeza
+```
+
+Os relatórios são gerados automaticamente em `backend/reports/` (não versionados no Git):
+
+| Arquivo | Conteúdo |
+|---|---|
+| `banco_analise_nulos.csv` | Campos nulos por ticker |
+| `relatorio_inativos.csv` | Tickers inativos com motivo e tipo |
+| `relatorio_anomalias.csv` | Indicadores fora do range (compliance) |
+
+#### Garantia de qualidade de dados
+
+O script `ensure_min_indicators` é executado automaticamente ao final de cada rodada do ETL. Ele garante que todos os tickers ativos tenham pelo menos **3 indicadores disponíveis** para o cálculo do score.
+
+**Fluxo por ticker com < 3 indicadores:**
+1. Busca indicadores faltantes em fonte alternativa (yfinance)
+2. Calcula indicadores derivados a partir dos dados já no banco (ex: ROE = lucro/patrimônio)
+3. Se ainda < 3 após todas as tentativas → move para `inactive_tickers`
+
+```bash
+# Apenas relatório, sem alterar banco
+python -m backend.scripts.ensure_min_indicators --dry-run
+```
+
+---
+
+
+
+- Consulta por ticker — ações e FIIs da B3 (~937 ativos ativos)
+- Score fundamentalista unificado (0-100) com classificação qualitativa
+- Indicadores específicos por tipo de ativo (ações vs FIIs)
+- Visualização de gráficos e histórico de preços
+- Comparação setorial
+- Análise gerada por LLM (Claude) com explicações educativas
+- Identificação de tickers inativos com mensagem explicativa
+- Atualização diária (pós-fechamento do mercado, 19h Brasília)
 
 ---
 
@@ -161,12 +248,14 @@ O prompt define explicitamente o **formato de saída** (estruturado) para garant
 
 ---
 
-## 📦 Escopo Inicial
+## 📦 Escopo Inicial (MVP)
 
-- Foco em ações da B3
-- Análise fundamentalista (não técnico)
+- Ações e FIIs ativos listados na B3
+- Análise fundamentalista com indicadores específicos por tipo de ativo
+- Score unificado (0-100) — mesmo output para ações e FIIs
 - Dados históricos (não tempo real)
 - Sem recomendação direta de compra/venda
+- Tickers inativos identificados e bloqueados com mensagem ao usuário
 
 ---
 
@@ -325,14 +414,14 @@ npm start
 | `fastapi` | 0.115.12 | Framework da API REST |
 | `uvicorn` | 0.34.2 | Servidor ASGI |
 | `sqlalchemy` | 2.0.40 | ORM para banco de dados |
-| `yfinance` | 0.2.61 | Coleta de dados financeiros |
-| `fundamentus` | 0.3.2 | Indicadores fundamentalistas B3 |
+| `yfinance` | 0.2.61 | Cotações, histórico, DRE e dados de FIIs |
+| `fundamentus` | 0.3.2 | Indicadores fundamentalistas de ações da B3 |
 | `anthropic` | 0.52.0 | Geração de análises via LLM |
-| `pandas` | 2.3.0 | Processamento de dados |
-| `numpy` | 2.0.2 | Computação numérica |
-| `requests` | 2.32.4 | Cliente HTTP |
+| `pandas` | ≥2.3.0 | Processamento de dados |
+| `requests` | ≥2.28.0 | Cliente HTTP (BCB API) |
 | `apscheduler` | 3.10.4 | Agendamento do ETL |
 | `python-dotenv` | 1.0.1 | Gerenciamento de variáveis de ambiente |
+| `pytz` | 2025.2 | Timezone de Brasília (prompt logging) |
 
 ### ⚠️ Troubleshooting
 

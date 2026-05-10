@@ -137,7 +137,7 @@ def run_etl_for_ticker(
         return result
 
     result.update({
-        "status": result.get("status") or "success",
+        "status": "partial" if result.get("status") == "partial" else "success",
         "indicators": indicators,
         "score": score_result["score"],
         "score_label": score_result["label"],
@@ -251,6 +251,15 @@ def run_full_pipeline(
         partial_count,
         error_count,
     )
+
+    # --- Verificação de indicadores mínimos ---
+    # Executada após cada rodada do ETL para garantir que todos os tickers
+    # tenham pelo menos 3 indicadores disponíveis para o cálculo do score.
+    try:
+        from backend.scripts.ensure_min_indicators import run_after_etl
+        run_after_etl()
+    except Exception as exc:
+        logger.warning("[ETL] Verificação de indicadores mínimos falhou: %s", exc)
 
     return report
 

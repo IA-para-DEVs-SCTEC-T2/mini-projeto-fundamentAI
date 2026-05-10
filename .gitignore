@@ -152,6 +152,10 @@ activemq-data/
 *.sqlite3
 *.sqlite
 
+# Relatorios gerados automaticamente (CSVs de analise e compliance)
+# O diretorio backend/reports/ e versionado via .gitkeep, mas os CSVs nao
+backend/reports/*.csv
+
 # Environments
 .env
 .envrc
@@ -222,3 +226,4 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+

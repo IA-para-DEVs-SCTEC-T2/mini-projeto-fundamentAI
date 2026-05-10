@@ -1,16 +1,12 @@
 """
 Cálculo de indicadores fundamentalistas.
 
-Recebe dados financeiros brutos (coletados pelos collectors) e calcula
-os indicadores usados na análise e no scoring.
+Recebe dados financeiros brutos e calcula os indicadores usados na análise.
+Funções puras — sem dependência de banco ou API.
 
-Todos os cálculos são funções puras — sem dependência de banco ou API.
-Isso facilita testes unitários e reutilização.
-
-Uso:
-    from backend.processors.indicators import calculate_all_indicators
-
-    indicators = calculate_all_indicators(financial_data, quote_data)
+Ações: ROE, ROIC, margem líquida, dívida/EBITDA, P/L, P/VP, EV/EBITDA,
+       dividend yield, crescimento de lucro YoY
+FIIs:  P/VP, P/L, dividend yield, crescimento de dividendos YoY
 """
 
 import logging
@@ -396,3 +392,26 @@ def calculate_all_indicators(
     logger.info("Indicadores calculados: %s | Indisponíveis: %s", available, missing)
 
     return indicators
+
+
+def calculate_fii_indicators(fii_data: dict) -> dict:
+    """
+    Monta o dicionário de indicadores para um FII a partir dos dados coletados.
+
+    Args:
+        fii_data: Dicionário retornado por get_fii_data() do coletor FII.
+
+    Returns:
+        Dicionário com indicadores do FII:
+        - pb_ratio, pe_ratio, dividend_yield, dividend_growth_yoy
+
+    Exemplo:
+        >>> indicators = calculate_fii_indicators(fii_data)
+        >>> print(f"DY: {indicators['dividend_yield']:.1%}")
+    """
+    return {
+        "pb_ratio": fii_data.get("pb_ratio"),
+        "pe_ratio": fii_data.get("pe_ratio"),
+        "dividend_yield": fii_data.get("dividend_yield"),
+        "dividend_growth_yoy": fii_data.get("dividend_growth_yoy"),
+    }

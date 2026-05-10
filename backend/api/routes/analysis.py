@@ -282,7 +282,7 @@ def _call_anthropic(system_prompt: str, user_prompt: str, model: str) -> str:
         HTTPException 500: Para outros erros.
     """
     api_key = os.getenv("ANTHROPIC_API_KEY")
-    if not api_key or api_key == "sua_chave_aqui":
+    if not api_key or api_key == "lac-to-cocos":
         logger.warning("ANTHROPIC_API_KEY ausente ou inválida. Retornando dados mockados.")
         return """
         {

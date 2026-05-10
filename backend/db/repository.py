@@ -46,7 +46,7 @@ class TickerRepository:
             name=name,
             sector=sector,
             segment=segment,
-            asset_type=asset_type,
+            asset_type=asset_type or "stock",
         )
         self.db.add(ticker)
         self.db.commit()
