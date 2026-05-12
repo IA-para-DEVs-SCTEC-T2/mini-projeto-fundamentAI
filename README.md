@@ -377,7 +377,7 @@ npm install
 
 #### Backend (API)
 
-**Importante:** Sempre ative o ambiente virtual antes de executar:
+**⚠️ IMPORTANTE:** Sempre ative o ambiente virtual antes de executar qualquer comando Python!
 
 ```bash
 cd backend
@@ -393,12 +393,21 @@ venv\Scripts\activate
 uvicorn api.main:app --reload
 ```
 
+Você saberá que o ambiente virtual está ativo quando ver `(venv)` no início da linha do terminal:
+```bash
+(venv) user@machine backend %
+```
+
 A API estará disponível em `http://localhost:8000`
 
 **Para desativar o ambiente virtual:**
 ```bash
 deactivate
 ```
+
+**Troubleshooting:**
+- **Erro `command not found: uvicorn`** → Você não ativou o ambiente virtual. Execute `source venv/bin/activate` primeiro.
+- **Erro `No module named 'fastapi'`** → Instale as dependências: `pip install -r requirements.txt`
 
 #### Frontend *(quando implementado)*
 
@@ -425,6 +434,10 @@ npm start
 
 ### ⚠️ Troubleshooting
 
+**Erro `command not found: uvicorn`:**
+- **Causa:** Ambiente virtual não está ativado
+- **Solução:** Execute `source venv/bin/activate` (macOS/Linux) ou `venv\Scripts\activate` (Windows) antes de rodar o uvicorn
+
 **Erro ao instalar `yfinance`:**
 ```bash
 pip install --upgrade pip
@@ -444,6 +457,14 @@ sudo apt-get install python3-dev libopenblas-dev
 - Verificar se o arquivo `.env` existe na raiz do projeto
 - Verificar se a variável está preenchida corretamente
 - Reiniciar o servidor após alterar o `.env`
+
+**Ambiente virtual não existe:**
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # macOS/Linux
+pip install -r requirements.txt
+```
 
 ---
 

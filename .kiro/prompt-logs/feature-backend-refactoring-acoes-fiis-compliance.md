@@ -394,4 +394,15 @@ Observações: O Kiro não registrou alguns prompts que fiz ao longo do trabalho
 Isso começou a contecer quando ja haviamos executado muitas ações no codigo.
 Nestes bugs ele apenas renpondia "Understand" e não continuava o trabalho. E o registro de prompts nestes momentos não aconteceram.
 
-Acredito que é uma limitação da propria ferramenta e não do script de registro de prompt.
+Acredito que é uma limitação da propria ferramenta e não do script de registro de prompt.## Prompt: Ao rodar o comando uvicorn backend.api.main:app --...
+- Responsável: Alysson Girotto
+- Branch: feature/backend-refactoring-acoes-fiis-compliance
+- Data/hora: 2026-05-12 14:18:55 (Brasília)
+
+### Prompt original
+```
+Ao rodar o comando uvicorn backend.api.main:app --reload ocorreu o erro: zsh: command not found: uvicornComo resolver? Preciso atualizar alguma instrução ou arquivo do projeto?
+```
+
+---
+
