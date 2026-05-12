@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Prompt Logger",
+  "description": "Registra automaticamente prompts executados no Kiro, organizados por branch Git",
+  "version": "1",
+  "when": {
+    "type": "promptSubmit"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "python3 .kiro/scripts/log_prompt.py"
+  }
+}

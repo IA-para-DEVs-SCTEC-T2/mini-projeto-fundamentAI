@@ -100,14 +100,25 @@ grep -A 10 "palavra-chave" .kiro/prompt-logs/<branch-name>.md
 ### 1. Captura de Conteúdo do Prompt
 
 O Kiro pode não expor o conteúdo completo do prompt via hooks. Neste caso:
-- Logs conterão placeholder: `[Conteúdo não capturado]`
-- Metadados (branch, usuário, timestamp) ainda são registrados
+- Prompts sem conteúdo são **automaticamente filtrados**
+- Não gera entradas vazias nos logs
+- Sistema prioriza qualidade sobre quantidade
 
-### 2. Resumo de Resultados
+### 2. Filtragem de Prompts Triviais
+
+O sistema filtra automaticamente prompts triviais:
+- Confirmações simples (sim, não, ok, yes, no)
+- Respostas muito curtas (< 10 caracteres)
+- Comandos de navegação (next, back, continue)
+- Prompts sem conteúdo capturado
+
+**Justificativa:** Logs devem conter apenas interações significativas.
+
+### 3. Resumo de Resultados
 
 MVP não inclui captura de resultados do agente. Planejado para fase futura.
 
-### 3. Crescimento de Arquivos
+### 4. Crescimento de Arquivos
 
 Arquivos de log crescem indefinidamente. Estratégia de rotação planejada para fase futura.
 
@@ -149,6 +160,7 @@ Quando trabalhar com prompt logging:
 3. **Preservar histórico** - Sempre usar append, nunca sobrescrever
 4. **Sanitizar nomes** - Converter caracteres especiais em nomes de arquivo válidos
 5. **Documentar limitações** - Ser transparente sobre o que não é capturado
+6. **Filtrar prompts triviais** - Não registrar confirmações simples ou respostas muito curtas
 
 ---
 

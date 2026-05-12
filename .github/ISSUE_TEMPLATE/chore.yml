@@ -1,0 +1,71 @@
+name: 🔧 Chore/Maintenance
+description: Tarefas de manutenção, configuração ou refatoração
+title: "chore: "
+labels: ["chore"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🔧 Manutenção
+        Tarefas de manutenção, configuração ou refatoração sem impacto funcional direto.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto
+      description: Por que esta tarefa de manutenção é necessária?
+      placeholder: |
+        Descreva o contexto e a motivação para esta tarefa.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Escopo
+      description: O que deve ser feito?
+      placeholder: |
+        - Tarefa 1
+        - Tarefa 2
+        - Tarefa 3
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Critérios de Aceite
+      description: Como validar que a tarefa está completa?
+      placeholder: |
+        - [ ] Critério 1
+        - [ ] Critério 2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: chore-type
+    attributes:
+      label: Tipo de Tarefa
+      description: Qual tipo de manutenção?
+      options:
+        - Configuração
+        - Dependências
+        - Refatoração
+        - CI/CD
+        - Tooling
+        - Limpeza de Código
+        - Performance
+        - Segurança
+        - Outro
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impacto
+      description: Qual o impacto desta mudança? (performance, segurança, manutenibilidade)
+      placeholder: |
+        Descreva o impacto esperado desta tarefa.
+    validations:
+      required: false

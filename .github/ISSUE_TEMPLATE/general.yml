@@ -1,0 +1,41 @@
+name: 💬 General Issue
+description: Issue genérica que não se encaixa nas outras categorias
+title: ""
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 💬 Issue Genérica
+        Use este template para issues que não se encaixam nas outras categorias.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição
+      description: Descreva a issue de forma clara e objetiva
+      placeholder: |
+        Descreva o que precisa ser feito ou discutido.
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Detalhes Adicionais
+      description: Informações complementares relevantes
+      placeholder: |
+        Adicione qualquer contexto, referências ou detalhes relevantes.
+    validations:
+      required: false
+
+  - type: textarea
+    id: references
+    attributes:
+      label: Referências
+      description: Links ou documentos relacionados
+      placeholder: |
+        - Link 1
+        - Link 2
+    validations:
+      required: false

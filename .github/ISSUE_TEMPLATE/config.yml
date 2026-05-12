@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📚 Documentação do Projeto
+    url: https://github.com/IA-para-DEVs-SCTEC-T2/mini-projeto-fundamentAI/blob/main/README.md
+    about: Consulte a documentação completa do projeto
+  - name: 📊 Project Board
+    url: https://github.com/orgs/IA-para-DEVs-SCTEC-T2/projects/8
+    about: Visualize o backlog e progresso do projeto

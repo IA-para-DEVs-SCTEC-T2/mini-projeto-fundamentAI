@@ -207,6 +207,227 @@ Os arquivos de steering em `.kiro/steering/` definem o contexto permanente injet
 
 ---
 
+## 🚀 Instalação e Configuração
+
+### Pré-requisitos
+
+- Python 3.8 ou superior
+- pip (gerenciador de pacotes Python)
+- Node.js 16+ e npm (para o frontend, quando implementado)
+- Git
+
+### 1️⃣ Clonar o Repositório
+
+```bash
+git clone https://github.com/IA-para-DEVs-SCTEC-T2/FundamentAI.git
+cd FundamentAI
+```
+
+### 2️⃣ Configurar Backend
+
+#### Instalar Dependências
+
+```bash
+cd backend
+pip install -r requirements.txt
+```
+
+**Recomendação:** Usar ambiente virtual para isolar dependências:
+
+```bash
+# Criar ambiente virtual
+python -m venv venv
+
+# Ativar ambiente virtual
+# No macOS/Linux:
+source venv/bin/activate
+# No Windows:
+venv\Scripts\activate
+
+# Instalar dependências
+pip install -r requirements.txt
+```
+
+#### Configurar Variáveis de Ambiente
+
+1. Copiar o arquivo de exemplo:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Editar `.env` e preencher as variáveis necessárias:
+   ```bash
+   # Obrigatório: chave da API da Anthropic
+   ANTHROPIC_API_KEY=sua_chave_aqui
+   
+   # Opcional: ajustar configurações de banco e API
+   DATABASE_URL=sqlite:///./fundamentai.db
+   API_PORT=8000
+   ```
+
+3. **Obter chave da Anthropic:**
+   - Criar conta em [console.anthropic.com](https://console.anthropic.com)
+   - Gerar API key em "API Keys"
+   - Copiar e colar no arquivo `.env`
+
+#### Verificar Instalação
+
+```bash
+# Testar importações
+python -c "import fastapi, anthropic, yfinance, pandas; print('✅ Dependências instaladas com sucesso!')"
+```
+
+### 3️⃣ Configurar Frontend *(quando implementado)*
+
+```bash
+cd frontend
+npm install
+```
+
+### 4️⃣ Executar o Projeto
+
+#### Backend (API)
+
+**Importante:** Sempre ative o ambiente virtual antes de executar:
+
+```bash
+cd backend
+
+# Ativar ambiente virtual
+# No macOS/Linux:
+source venv/bin/activate
+
+# No Windows:
+venv\Scripts\activate
+
+# Executar a API
+uvicorn api.main:app --reload
+```
+
+A API estará disponível em `http://localhost:8000`
+
+**Para desativar o ambiente virtual:**
+```bash
+deactivate
+```
+
+#### Frontend *(quando implementado)*
+
+```bash
+cd frontend
+npm start
+```
+
+### 🔍 Estrutura de Dependências
+
+| Dependência | Versão | Finalidade |
+|---|---|---|
+| `fastapi` | 0.115.12 | Framework da API REST |
+| `uvicorn` | 0.34.2 | Servidor ASGI |
+| `sqlalchemy` | 2.0.40 | ORM para banco de dados |
+| `yfinance` | 0.2.61 | Coleta de dados financeiros |
+| `fundamentus` | 0.3.2 | Indicadores fundamentalistas B3 |
+| `anthropic` | 0.52.0 | Geração de análises via LLM |
+| `pandas` | 2.3.0 | Processamento de dados |
+| `numpy` | 2.0.2 | Computação numérica |
+| `requests` | 2.32.4 | Cliente HTTP |
+| `apscheduler` | 3.10.4 | Agendamento do ETL |
+| `python-dotenv` | 1.0.1 | Gerenciamento de variáveis de ambiente |
+
+### ⚠️ Troubleshooting
+
+**Erro ao instalar `yfinance`:**
+```bash
+pip install --upgrade pip
+pip install yfinance --no-cache-dir
+```
+
+**Erro ao instalar `pandas` ou `numpy`:**
+```bash
+# Instalar dependências de sistema (macOS)
+brew install openblas
+
+# Instalar dependências de sistema (Ubuntu/Debian)
+sudo apt-get install python3-dev libopenblas-dev
+```
+
+**Erro "ANTHROPIC_API_KEY not found":**
+- Verificar se o arquivo `.env` existe na raiz do projeto
+- Verificar se a variável está preenchida corretamente
+- Reiniciar o servidor após alterar o `.env`
+
+---
+
+## 📝 Prompt Logging
+
+Este projeto implementa um sistema automático de **logging de prompts** executados no Kiro, organizado por branch Git. O objetivo é manter rastreabilidade completa das interações com o agente durante o desenvolvimento.
+
+### Como Funciona
+
+Sempre que você submete um prompt ao Kiro, o sistema automaticamente:
+
+- Registra o conteúdo do prompt
+- Captura metadados (branch, responsável, data/hora)
+- Salva em arquivo Markdown específico da branch
+- Mantém histórico incremental e versionável
+
+### Estrutura de Logs
+
+```
+.kiro/prompt-logs/
+├── main.md                 # Logs da branch main
+├── develop.md              # Logs da branch develop
+├── feature-auth.md         # Logs de feature/auth
+└── bugfix-crash-fix.md     # Logs de bugfix/crash-fix
+```
+
+### Consulta de Logs
+
+**Ver logs de uma branch:**
+```bash
+cat .kiro/prompt-logs/<branch-name>.md
+```
+
+**Últimas entradas:**
+```bash
+tail -n 50 .kiro/prompt-logs/<branch-name>.md
+```
+
+**Buscar por palavra-chave:**
+```bash
+grep -A 10 "palavra-chave" .kiro/prompt-logs/<branch-name>.md
+```
+
+### Versionamento de Logs
+
+**Decisão:** Os arquivos de log de prompts **são versionados no Git** por padrão.
+
+**Justificativa:**
+- **Rastreabilidade:** Facilita code reviews ao permitir que revisores entendam o contexto das decisões tomadas durante o desenvolvimento
+- **Documentação:** Preserva o histórico completo do processo de desenvolvimento para referência futura
+- **Compartilhamento de conhecimento:** Permite que membros da equipe aprendam com as interações anteriores
+- **Auditoria:** Mantém registro completo das interações com o agente Kiro
+
+**Considerações:**
+- Os logs contêm apenas informações do projeto (prompts, metadados de Git)
+- Não contêm dados sensíveis (tokens, senhas, chaves de API)
+- O formato Markdown facilita diffs legíveis no Git
+- Arquivos crescem incrementalmente, mas permanecem em formato texto
+
+**Alternativa:** Se em algum momento o projeto decidir não versionar logs, adicione ao `.gitignore`:
+```gitignore
+# Prompt logs (desabilitar versionamento)
+.kiro/prompt-logs/
+```
+
+### Documentação Completa
+
+Para mais detalhes sobre o sistema de prompt logging, incluindo arquitetura, limitações e troubleshooting, consulte:
+
+📖 **[docs/prompt-logging.md](docs/prompt-logging.md)**
+
+---
+
 ## 🧩 Como Implementar
 
 ### Backend
@@ -259,6 +480,60 @@ Contexto macro
 📚 Explicação didática
 🔍 Conclusão com nível de confiança
 ```
+
+---
+
+## 🤝 Como Contribuir
+
+Contribuições são bem-vindas! Para manter a qualidade e consistência do projeto, siga estas diretrizes:
+
+### Reportar Bugs ou Propor Funcionalidades
+
+Use os **templates de issues** disponíveis:
+
+1. Acesse [Issues](https://github.com/IA-para-DEVs-SCTEC-T2/mini-projeto-fundamentAI/issues/new/choose)
+2. Escolha o template apropriado:
+   - 🚀 **Feature Request** — Para novas funcionalidades
+   - 🐛 **Bug Report** — Para reportar bugs
+   - 📚 **Documentation** — Para melhorias na documentação
+   - 🔧 **Chore/Maintenance** — Para tarefas de manutenção
+   - 💬 **General Issue** — Para outros assuntos
+3. Preencha todos os campos obrigatórios
+
+### Contribuir com Código
+
+1. **Fork** o repositório
+2. Crie uma **branch** seguindo as convenções em `.kiro/steering/gitflow.md`:
+   ```bash
+   git checkout -b feature/nome-da-funcionalidade
+   ```
+3. Faça commits seguindo **Conventional Commits**:
+   ```bash
+   git commit -m "feat(escopo): descrição da mudança"
+   ```
+4. **Push** para seu fork:
+   ```bash
+   git push origin feature/nome-da-funcionalidade
+   ```
+5. Abra uma **Pull Request** usando o template automático
+6. Aguarde revisão e aprovação
+
+### Convenções do Projeto
+
+- **Git Flow**: `.kiro/steering/gitflow.md`
+- **Estrutura**: `.kiro/steering/structure.md`
+- **Stack Técnica**: `.kiro/steering/tech.md`
+- **Produto**: `.kiro/steering/product.md`
+
+### Templates
+
+Todos os templates estão documentados em [`.github/README.md`](.github/README.md).
+
+---
+
+## 📋 Backlog e Roadmap
+
+Acompanhe o progresso do projeto no [Project Board](https://github.com/orgs/IA-para-DEVs-SCTEC-T2/projects/8).
 
 ---
 

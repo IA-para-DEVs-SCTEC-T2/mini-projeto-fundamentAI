@@ -104,7 +104,43 @@ test(processors): adiciona testes unitários para cálculo de ROE
 
 ---
 
+## Issues
+
+### Templates de Issues
+
+O projeto utiliza **templates estruturados** para padronizar a criação de issues. Ao criar uma nova issue, escolha o template apropriado:
+
+| Template | Quando usar |
+|---|---|
+| 🚀 **Feature Request** | Propor novas funcionalidades |
+| 🐛 **Bug Report** | Reportar bugs ou comportamentos incorretos |
+| 📚 **Documentation** | Melhorias ou adições à documentação |
+| 🔧 **Chore/Maintenance** | Tarefas de manutenção, configuração ou refatoração |
+| 💬 **General Issue** | Issues que não se encaixam nas outras categorias |
+
+**Como usar:**
+1. Acesse [Issues > New Issue](https://github.com/IA-para-DEVs-SCTEC-T2/mini-projeto-fundamentAI/issues/new/choose)
+2. Selecione o template apropriado
+3. Preencha todos os campos obrigatórios
+4. Adicione labels relevantes (se não forem adicionadas automaticamente)
+
+**Documentação completa:** [`.github/README.md`](../.github/README.md)
+
+---
+
 ## Pull Requests
+
+### Template de Pull Request
+
+O projeto utiliza um **template automático** para PRs. Ao abrir uma nova PR, o template será aplicado automaticamente com as seguintes seções:
+
+- **Contexto** — Por que a mudança é necessária
+- **O que foi feito** — Descrição das alterações
+- **Como testar** — Passos para validação
+- **Dependências** — Issues relacionadas (`Closes #123`)
+- **Referências** — Links para documentação
+- **Checklist** — Itens de verificação
+- **Screenshots/Logs** — Evidências visuais (opcional)
 
 ### Título
 Seguir o mesmo padrão de Conventional Commits:
@@ -114,18 +150,21 @@ fix(api): corrige timeout no endpoint de análise
 ```
 
 ### Descrição
-Incluir obrigatoriamente:
+O template já inclui as seções obrigatórias. Preencha todas as seções relevantes:
 
-- **O que foi feito** — resumo da alteração
-- **Por que foi feito** — contexto ou problema resolvido
-- **Como testar** — passos para validar localmente
-- **Issue relacionada** — `Closes #123` ou `Ref #123`, quando existir
+- **Contexto** — Por que essa mudança é necessária? Qual problema ela resolve?
+- **O que foi feito** — Descreva as alterações de forma clara e objetiva
+- **Como testar** — Passo a passo para validar as alterações localmente
+- **Dependências** — Use `Closes #123` para fechar issues automaticamente
+- **Referências** — Links para documentação, steering files, ou recursos externos
 
 ### Antes de abrir o PR
 - [ ] Código testado localmente
+- [ ] Testes unitários/integração adicionados (quando aplicável)
+- [ ] Documentação atualizada (quando aplicável)
+- [ ] Commits seguem Conventional Commits
 - [ ] Sem conflitos com a branch de destino (`develop` ou `main`)
-- [ ] Commits seguem a convenção definida
-- [ ] Documentação atualizada, se necessário
+- [ ] Template de PR preenchido completamente
 
 ### Revisão
 - Todo PR deve ter ao menos **1 aprovação** antes do merge

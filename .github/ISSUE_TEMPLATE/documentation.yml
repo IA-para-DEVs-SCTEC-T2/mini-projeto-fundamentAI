@@ -1,0 +1,70 @@
+name: 📚 Documentation
+description: Melhorias ou adições à documentação
+title: "docs: "
+labels: ["docs"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 📚 Documentação
+        Ajude a melhorar a documentação do FundamentAI!
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto
+      description: Qual documentação precisa ser criada ou melhorada?
+      placeholder: |
+        Descreva o que está faltando ou precisa ser melhorado na documentação.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Escopo
+      description: O que deve ser documentado?
+      placeholder: |
+        - Tópico 1
+        - Tópico 2
+        - Tópico 3
+    validations:
+      required: true
+
+  - type: textarea
+    id: target-audience
+    attributes:
+      label: Público-Alvo
+      description: Para quem é esta documentação?
+      placeholder: |
+        Ex: Desenvolvedores iniciantes, usuários finais, administradores de sistema
+    validations:
+      required: false
+
+  - type: dropdown
+    id: doc-type
+    attributes:
+      label: Tipo de Documentação
+      description: Que tipo de documentação será criada/atualizada?
+      options:
+        - README
+        - Guia de Instalação
+        - Guia de Uso
+        - Documentação de API
+        - Arquitetura
+        - Steering Files
+        - Comentários no Código
+        - Outro
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: Referências
+      description: Links para recursos ou documentação relacionada
+      placeholder: |
+        - Link 1
+        - Link 2
+    validations:
+      required: false
