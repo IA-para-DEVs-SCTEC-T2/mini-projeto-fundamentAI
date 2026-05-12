@@ -45,14 +45,10 @@ O sistema utiliza um **hook do Kiro** que intercepta o evento `promptSubmit` e e
 O sistema requer a biblioteca `pytz` para manipulação de fusos horários:
 
 ```bash
-pip install -r requirements.txt
-```
-
-Ou instale diretamente:
-
-```bash
 pip install pytz
 ```
+
+> **Atenção:** Se `pytz` não estiver instalado, o hook falhará com `ModuleNotFoundError: No module named 'pytz'`. Instale antes de usar o Kiro para garantir que os logs sejam registrados corretamente.
 
 ### Passo 2: Verificar Estrutura
 
