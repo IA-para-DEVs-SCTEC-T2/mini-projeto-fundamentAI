@@ -379,6 +379,8 @@ npm install
 
 **⚠️ IMPORTANTE:** Sempre ative o ambiente virtual antes de executar qualquer comando Python!
 
+**Opção 1: Executar do diretório `backend` (recomendado)**
+
 ```bash
 cd backend
 
@@ -389,8 +391,22 @@ source venv/bin/activate
 # No Windows:
 venv\Scripts\activate
 
-# Executar a API
+# Executar a API (SEM o prefixo "backend.")
 uvicorn api.main:app --reload
+```
+
+**Opção 2: Executar da raiz do projeto**
+
+```bash
+# Ativar ambiente virtual
+# No macOS/Linux:
+source backend/venv/bin/activate
+
+# No Windows:
+backend\venv\Scripts\activate
+
+# Executar a API (COM o prefixo "backend.")
+uvicorn backend.api.main:app --reload
 ```
 
 Você saberá que o ambiente virtual está ativo quando ver `(venv)` no início da linha do terminal:
@@ -407,6 +423,7 @@ deactivate
 
 **Troubleshooting:**
 - **Erro `command not found: uvicorn`** → Você não ativou o ambiente virtual. Execute `source venv/bin/activate` primeiro.
+- **Erro `No module named 'backend'`** → Você está no diretório `backend` mas usando `uvicorn backend.api.main:app`. Use `uvicorn api.main:app --reload` (sem o prefixo "backend.").
 - **Erro `No module named 'fastapi'`** → Instale as dependências: `pip install -r requirements.txt`
 
 #### Frontend *(quando implementado)*
