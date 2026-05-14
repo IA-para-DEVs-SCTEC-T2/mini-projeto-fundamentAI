@@ -64,3 +64,74 @@ Agora atue como um **Product Owner Especialista em BDD.** Sua tarefa é pegar as
 
 ---
 
+## Prompt: Agora atue como um **Arquiteto de Software especia...
+- Responsável: Alysson Girotto
+- Branch: docs/adicionar-prd
+- Data/hora: 2026-05-14 17:43:48 (Brasília)
+
+### Prompt original
+```
+Agora atue como um **Arquiteto de Software especialista em C4 Model**. Sua tarefa é gerar os **4 níveis do Diagrama C4** do projeto **FundamentAI** em Mermaid, de forma incremental — um nível por vez, aguardando confirmação antes de avançar.  ---  ## Fontes de Contexto Obrigatórias  Antes de gerar qualquer diagrama, leia e analise os seguintes arquivos e recursos do repositório:  - `docs/PRD.md` — visão do produto, arquitetura, stack tecnológica, fluxo de funcionamento e modelo de dados - `.kiro/steering/tech.md` — decisões técnicas, fontes de dados, lógica de scoring e fluxo completo de dados - `.kiro/steering/structure.md` — organização de diretórios, responsabilidades por camada e convenções do projeto - **Estrutura real do repositório** — navegue pelos diretórios e arquivos existentes para identificar o que já foi implementado e o que ainda não existe  ---  ## Convenção para Elementos Pendentes  Ao navegar pelo repositório, registre quais módulos, arquivos e componentes descritos no PRD e nos arquivos de steering **ainda não foram criados**. Nos diagramas:  - Adicione um `*` ao final do rótulo de todo elemento pendente de implementação (ex: `ScoreCard*`) - Inclua ao final do diagrama, fora do bloco de código Mermaid, uma seção **"Elementos pendentes de implementação"** listando cada item marcado com `*`, sua localização esperada no repositório e uma linha de descrição do que precisa ser criado  ---  ## Regra de Nomenclatura dos Arquivos  Cada diagrama gerado deve ser salvo em `docs/` com o nome explicitando o nível C4:  | Nível | Nome do arquivo | |---|---| | 1 — Contexto | `c4-nivel-1-contexto.md` | | 2 — Container | `c4-nivel-2-container.md` | | 3 — Componente | `c4-nivel-3-componente.md` | | 4 — Código | `c4-nivel-4-codigo.md` |  ---  ## Instruções de Execução  **Comece pelo Nível 1 (Contexto).** Somente avance para o próximo nível após confirmação explícita.  ### Nível 1 — Contexto Mostre o sistema FundamentAI como uma caixa única, os usuários que interagem com ele (personas do PRD) e os sistemas externos com os quais se comunica (Anthropic API, fundamentus, yfinance, API do Banco Central). Responde: *"O que é o sistema e quem o usa?"*  ### Nível 2 — Container Expanda o sistema em seus containers internos: Frontend React, API FastAPI, ETL Scheduler, banco de dados e módulo de prompts. Mostre protocolos e direção das comunicações. Marque com `*` os containers ou sub-módulos ainda não implementados. Responde: *"Como o sistema está dividido tecnicamente?"*  ### Nível 3 — Componente Expanda o container **API FastAPI** em seus componentes internos: rotas, processors, repository e prompt builder. Marque com `*` os componentes previstos na arquitetura mas ainda ausentes no repositório. Responde: *"O que existe dentro de cada container?"*  ### Nível 4 — Código Represente em `classDiagram` (Mermaid) as entidades do banco baseando-se em `backend/db/models.py`: classes, atributos, tipos e relacionamentos. Marque com `*` entidades ou atributos previstos no PRD mas ainda não implementados no modelo. Responde: *"Como o código está estruturado?"*  ---  ## Formato de Entrega por Nível  1. Bloco de código Mermaid completo e funcional, pronto para ser inserido no respectivo arquivo `.md` 2. Seção **"Elementos pendentes de implementação"** listando cada item marcado com `*`, sua localização esperada e uma linha de descrição do que precisa ser criado 3. **Revisão técnica** em lista com: decisões de design representadas, limitações do diagrama e o que será detalhado no próximo nível  > **Aguarde a confirmação para avançar ao Nível 2.**
+```
+
+---
+
+## Prompt: Ótimo. Vamos para o nível 2 (Container)
+- Responsável: Alysson Girotto
+- Branch: docs/adicionar-prd
+- Data/hora: 2026-05-14 17:46:17 (Brasília)
+
+### Prompt original
+```
+Ótimo. Vamos para o nível 2 (Container)
+```
+
+---
+
+## Prompt: Ótimo. Vamos para o nível 3 (Componente)
+- Responsável: Alysson Girotto
+- Branch: docs/adicionar-prd
+- Data/hora: 2026-05-14 17:48:29 (Brasília)
+
+### Prompt original
+```
+Ótimo. Vamos para o nível 3 (Componente)
+```
+
+---
+
+## Prompt: Ótimo. Vamos para o nível 4 (Código)
+- Responsável: Alysson Girotto
+- Branch: docs/adicionar-prd
+- Data/hora: 2026-05-14 17:54:14 (Brasília)
+
+### Prompt original
+```
+Boa. Vamos para o nível 4 (Código)
+```
+
+---
+## Prompt: No material de estudo consta que a representação a...
+- Responsável: Alysson Girotto
+- Branch: docs/adicionar-prd
+- Data/hora: 2026-05-14 17:56:33 (Brasília)
+
+### Prompt original
+```
+No material de estudo consta que a representação a nível de código está mais relacionada à estrutura de arquivos no diretório. Você gerou uma estrutura mais semelhante à classes UML. Ambas estão corretas? Se sim, gere também um segundo arquivo C4 relacionado com a estrutura do diretório
+```
+
+---
+
+## Prompt: Ficou muito pequeno. Está impossível visualizar. S...
+- Responsável: Alysson Girotto
+- Branch: docs/adicionar-prd
+- Data/hora: 2026-05-14 17:58:37 (Brasília)
+
+### Prompt original
+```
+Ficou muito pequeno. Está impossível visualizar. Separar em frontend e backend ou em outra forma que poderá facilitar a visualização. Eu também quero uma visualização adicional na forma de estrutura de diretório, conforme consta no exemplo da aula (adicionado em anexo).
+```
+
+---
+
