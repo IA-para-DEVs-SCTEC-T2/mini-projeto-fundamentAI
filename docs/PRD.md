@@ -76,9 +76,32 @@ O **FundamentAI** é uma plataforma web que consolida dados financeiros público
 
 ### 3.1 Classificação de Ativos
 
-- Tickers terminados em `11` são classificados como **FII** (ex: `HGLG11`, `XPML11`).
-- Demais tickers são classificados como **ação** (ex: `PETR4`, `VALE3`).
-- A classificação é realizada automaticamente pelo módulo `backend/processors/asset_classifier.py`.
+A classificação de um ativo como **FII** ou **ação** é determinada pelo campo `b3_type` proveniente da B3.
+
+**Regra de negócio:**
+
+- Ativos com `b3_type` indicando fundo imobiliário são classificados como **FII** (ex: `HGLG11`, `XPML11`, `MXRF11`).
+- Ativos com `b3_type` de ação — incluindo `ON`, `PN`, `UNT` e variantes (`ON NM`, `PN N2`, `UNT N2`, etc.) — são classificados como **ação**, independentemente do sufixo numérico.
+
+**Por que o sufixo `11` não é definitivo:**
+
+UNITs (certificados que representam conjuntos de ações ON + PN) também terminam em `11` mas são ações, não FIIs. Exemplos:
+
+| Ticker | `b3_type` | Classificação Correta |
+|---|---|---|
+| `HGLG11` | FII | `fii` |
+| `XPML11` | FII | `fii` |
+| `SAPR11` | UNT | `stock` |
+| `TAEE11` | UNT N2 | `stock` |
+| `SANB11` | UNT | `stock` |
+| `VALE3` | ON NM | `stock` |
+| `MGLU3` | ON NM | `stock` |
+| `BBAS3` | ON NM | `stock` |
+| `PETR4` | PN N2 | `stock` |
+| `ITUB4` | PN N1 | `stock` |
+| `BBDC4` | PN N1 | `stock` |
+
+A classificação é realizada pelo módulo `backend/processors/asset_classifier.py`, alimentado pelos dados de `b3_type` coletados da B3 durante o script `populate_all_tickers.py`.
 
 ### 3.2 Cálculo do Score — Ações
 
@@ -268,7 +291,7 @@ A arquitetura segue um modelo de **camadas desacopladas** com separação clara 
 
 **Critérios de aceite:**
 
-- [ ] O sistema identifica o ticker como FII (terminado em `11`) e aplica os indicadores corretos (P/VP, DY, Crescimento DY, P/L).
+- [ ] O sistema identifica o ticker como FII pelo `b3_type` e aplica os indicadores corretos (P/VP, DY, Crescimento DY, P/L).
 - [ ] O score apresenta breakdown dos 4 componentes com seus respectivos pesos.
 - [ ] A análise da IA contextualiza os dados com SELIC e IPCA atuais.
 - [ ] O formato de resposta é idêntico ao de ações (score, label, breakdown, asset_type).
