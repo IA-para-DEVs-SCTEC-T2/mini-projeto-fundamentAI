@@ -272,14 +272,32 @@ A arquitetura segue um modelo de **camadas desacopladas** com separação clara 
 > **Quero** digitar um ticker (ex: `PETR4`) e receber uma análise fundamentalista completa,  
 > **Para que** eu entenda rapidamente se o ativo é atrativo sem precisar pesquisar em múltiplas fontes.
 
-**Critérios de aceite:**
+---
 
-- [ ] O campo de busca aceita tickers em maiúsculas e minúsculas.
-- [ ] O sistema identifica automaticamente se o ticker é ação ou FII.
-- [ ] O score (0–100) e a classificação qualitativa são exibidos em destaque.
-- [ ] A análise textual gerada pela IA apresenta: veredito, pontos positivos, pontos negativos, avaliação de risco e conclusão.
-- [ ] A resposta é entregue em até 15 segundos (P95).
-- [ ] O disclaimer de não-recomendação é exibido de forma visível na página.
+**Cenário 1: Análise de ação retornada com sucesso**
+
+```gherkin
+Dado que o usuário acessa a página de busca
+  E o ticker "PETR4" está ativo no banco e possui indicadores atualizados
+Quando o usuário digita "petr4" no campo de busca e confirma
+Então o sistema normaliza a entrada para "PETR4"
+  E exibe o score fundamentalista (0–100) e a classificação qualitativa em destaque
+  E exibe a análise textual contendo: veredito, pontos positivos, pontos negativos, avaliação de risco e conclusão
+  E exibe o disclaimer de não-recomendação de forma visível
+  E entrega a resposta em até 15 segundos
+```
+
+**Cenário 2: Falha na geração da análise por timeout da API de IA**
+
+```gherkin
+Dado que o usuário acessa a página de busca
+  E o ticker "PETR4" está ativo e com indicadores disponíveis
+  E a API da Anthropic está com latência elevada e excede o tempo limite
+Quando o usuário solicita a análise do ticker "PETR4"
+Então o sistema exibe uma mensagem informando que a análise não pôde ser gerada no momento
+  E apresenta os dados financeiros e o score calculado localmente, sem o texto da IA
+  E não exibe tela de erro genérica nem stack trace
+```
 
 ---
 
@@ -289,12 +307,33 @@ A arquitetura segue um modelo de **camadas desacopladas** com separação clara 
 > **Quero** analisar um FII (ex: `HGLG11`) com indicadores específicos de fundos imobiliários,  
 > **Para que** eu avalie a atratividade do fundo com base em métricas relevantes para esse tipo de ativo.
 
-**Critérios de aceite:**
+---
 
-- [ ] O sistema identifica o ticker como FII pelo `b3_type` e aplica os indicadores corretos (P/VP, DY, Crescimento DY, P/L).
-- [ ] O score apresenta breakdown dos 4 componentes com seus respectivos pesos.
-- [ ] A análise da IA contextualiza os dados com SELIC e IPCA atuais.
-- [ ] O formato de resposta é idêntico ao de ações (score, label, breakdown, asset_type).
+**Cenário 1: Análise de FII com indicadores completos**
+
+```gherkin
+Dado que o usuário acessa a página de busca
+  E o ticker "HGLG11" está classificado como "fii" pelo b3_type no banco
+  E possui os indicadores P/VP, DY, Crescimento DY e P/L disponíveis
+Quando o usuário digita "HGLG11" e solicita a análise
+Então o sistema aplica o modelo de scoring de FII (pesos: P/VP 30%, DY 35%, Crescimento DY 20%, P/L 15%)
+  E exibe o score com o breakdown dos 4 componentes e seus respectivos pesos
+  E a análise da IA menciona a SELIC e o IPCA como contexto macroeconômico
+  E o formato da resposta é idêntico ao de ações (score, label, breakdown, asset_type)
+```
+
+**Cenário 2: FII com histórico de dividendos insuficiente para calcular CAGR**
+
+```gherkin
+Dado que o usuário acessa a página de busca
+  E o ticker "NEWF11" está classificado como "fii"
+  E não possui histórico de dividendos suficiente no yfinance para calcular o Crescimento DY
+Quando o usuário solicita a análise de "NEWF11"
+Então o sistema calcula o score com os indicadores disponíveis (P/VP, DY, P/L)
+  E atribui pontuação neutra ao componente Crescimento DY
+  E informa na interface quais indicadores não puderam ser calculados
+  E não bloqueia nem omite a análise por causa do dado ausente
+```
 
 ---
 
@@ -304,11 +343,27 @@ A arquitetura segue um modelo de **camadas desacopladas** com separação clara 
 > **Quero** ser informado claramente quando consultar um ticker inativo ou inexistente,  
 > **Para que** eu entenda por que a análise não está disponível e não fique confuso com uma tela de erro genérica.
 
-**Critérios de aceite:**
+---
 
-- [ ] Consultas a tickers inativos retornam HTTP 404.
-- [ ] A mensagem exibida no frontend é explicativa: informa que o ticker não possui dados suficientes para análise.
-- [ ] O sistema não tenta processar ou exibir dados parciais de tickers inativos.
+**Cenário 1: Consulta a ticker previamente marcado como inativo**
+
+```gherkin
+Dado que o ticker "XPTO3" consta na tabela "inactive_tickers" com motivo "sem_preco"
+Quando o usuário digita "XPTO3" e solicita a análise
+Então a API retorna HTTP 404
+  E o frontend exibe uma mensagem explicativa informando que o ativo não possui dados suficientes para análise
+  E o sistema não tenta buscar nem exibir dados financeiros parciais do ticker
+```
+
+**Cenário 2: Consulta a ticker completamente desconhecido**
+
+```gherkin
+Dado que o ticker "AAAA99" não existe na tabela "tickers" nem em "inactive_tickers"
+Quando o usuário digita "AAAA99" e solicita a análise
+Então a API retorna HTTP 404
+  E o frontend exibe uma mensagem informando que o ticker não foi encontrado na B3
+  E sugere ao usuário verificar se o ticker está correto
+```
 
 ---
 
@@ -318,12 +373,27 @@ A arquitetura segue um modelo de **camadas desacopladas** com separação clara 
 > **Quero** ver os indicadores do ativo comparados com a média do setor,  
 > **Para que** eu contextualize se o ativo está acima ou abaixo dos seus pares.
 
-**Critérios de aceite:**
+---
 
-- [ ] A página de análise exibe um componente de comparação setorial.
-- [ ] Os indicadores do ativo são apresentados lado a lado com a média do setor (quando disponível).
-- [ ] A ausência de dado setorial não quebra a experiência; o componente é ocultado ou exibe mensagem amigável.
-- [ ] A comparação usa os mesmos indicadores do scoring do tipo de ativo.
+**Cenário 1: Comparação setorial disponível para o ativo**
+
+```gherkin
+Dado que o usuário está na página de análise do ticker "VALE3"
+  E existem outros ativos do mesmo setor ("Mineração") com indicadores calculados no banco
+Quando a página de análise é carregada
+Então o componente de comparação setorial é exibido
+  E apresenta os indicadores de "VALE3" lado a lado com a média do setor
+  E usa os mesmos indicadores do modelo de scoring de ações (P/L, ROE, Margem Líquida, etc.)
+```
+
+**Cenário 2: Setor sem dados comparativos disponíveis**
+
+```gherkin
+Dado que o usuário está na página de análise de um ticker cujo setor não possui outros ativos com dados no banco
+Quando a página de análise é carregada
+Então o componente de comparação setorial é ocultado ou exibe a mensagem "Comparação setorial indisponível para este ativo"
+  E os demais componentes da página (score, análise da IA, indicadores) continuam funcionando normalmente
+```
 
 ---
 
@@ -333,11 +403,29 @@ A arquitetura segue um modelo de **camadas desacopladas** com separação clara 
 > **Quero** ler explicações didáticas sobre cada indicador exibido na análise,  
 > **Para que** eu aprenda o significado prático de P/L, ROE, DY e outros enquanto uso a plataforma.
 
-**Critérios de aceite:**
+---
 
-- [ ] Cada indicador exibido no dashboard possui um tooltip ou seção de explicação em linguagem acessível.
-- [ ] A explicação contextualiza o indicador para o tipo de ativo (ação ou FII).
-- [ ] As explicações são geradas ou curadas com precisão técnica — sem simplificações que induzam erros de interpretação.
+**Cenário 1: Usuário consulta a explicação de um indicador de ação**
+
+```gherkin
+Dado que o usuário está na página de análise de uma ação (ex: "BBAS3")
+  E o indicador ROE está exibido na tabela de indicadores
+Quando o usuário interage com o tooltip ou botão de ajuda ao lado do indicador "ROE"
+Então o sistema exibe uma explicação em linguagem acessível sobre o que é o ROE
+  E contextualiza o valor do indicador para o universo de ações (não de FIIs)
+  E a explicação não induz interpretações incorretas (ex: não afirma que ROE alto é sempre positivo sem ressalvas)
+```
+
+**Cenário 2: Usuário consulta indicador exclusivo de FII**
+
+```gherkin
+Dado que o usuário está na página de análise de um FII (ex: "HGLG11")
+  E o indicador P/VP está exibido na tabela de indicadores
+Quando o usuário interage com o tooltip ou botão de ajuda ao lado de "P/VP"
+Então o sistema exibe uma explicação contextualizada para FIIs
+  E esclarece que P/VP abaixo de 1 indica desconto sobre o valor patrimonial da cota
+  E não exibe a explicação de P/VP voltada para ações
+```
 
 ---
 
@@ -347,11 +435,32 @@ A arquitetura segue um modelo de **camadas desacopladas** com separação clara 
 > **Quero** que os dados dos ativos sejam atualizados automaticamente após o fechamento do pregão,  
 > **Para que** minhas análises reflitam as informações mais recentes disponíveis.
 
-**Critérios de aceite:**
+---
 
-- [ ] O ETL é executado automaticamente às 19h (fuso de Brasília) em dias úteis.
-- [ ] A data da última atualização é exibida na interface.
-- [ ] Falhas no ETL são registradas em log sem interromper a disponibilidade da API para dados já processados.
+**Cenário 1: ETL executado com sucesso após o fechamento do pregão**
+
+```gherkin
+Dado que são 19h00 no fuso horário de Brasília em um dia útil
+  E o APScheduler está ativo e configurado corretamente
+Quando o job "run_full_pipeline" é disparado automaticamente
+Então o sistema coleta dados de fundamentus, yfinance e BCB
+  E persiste os indicadores atualizados no banco via upsert
+  E executa "ensure_min_indicators" ao final para garantir qualidade mínima
+  E registra a data/hora da atualização, tornando-a visível na interface
+  E conclui todo o processo até às 21h
+```
+
+**Cenário 2: Falha parcial no ETL — fonte externa indisponível**
+
+```gherkin
+Dado que o job do ETL é disparado às 19h
+  E a fonte "fundamentus" está temporariamente indisponível
+Quando o pipeline tenta coletar os indicadores de ações via fundamentus
+Então o sistema registra o erro em log com detalhes da falha
+  E continua o pipeline com as demais fontes disponíveis (yfinance, BCB)
+  E mantém os dados do dia anterior disponíveis na API sem interrupção do serviço
+  E não propaga o erro para o usuário final durante a navegação
+```
 
 ---
 
