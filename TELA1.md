@@ -52,7 +52,7 @@ Estilo:            Dark premium, glassmorphism, bordas sutis rgba(255,255,255,0.
 
 ### Tela 2 — Dashboard de Análise
 
-![FundamentAI — Dashboard de Análise](docs/1.Analise.png)
+![FundamentAI — Dashboard de Análise](docs/Telas1/1.Analise.png)
 
 > Dashboard principal com grid 2 colunas: coluna esquerda (hero do ticker, indicadores, score) e coluna direita (diagnóstico da IA, pontos fortes/atenção, histórico de preços).
 
