@@ -135,3 +135,15 @@ Ficou muito pequeno. Está impossível visualizar. Separar em frontend e backend
 
 ---
 
+## Prompt: Gere uma Pull Request
+- Responsável: Alysson Girotto
+- Branch: docs/adicionar-prd
+- Data/hora: 2026-05-14 18:00:56 (Brasília)
+
+### Prompt original
+```
+Gere uma Pull Request
+```
+
+---
+
