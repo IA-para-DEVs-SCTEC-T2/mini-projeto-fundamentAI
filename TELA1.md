@@ -44,15 +44,11 @@ Estilo:            Dark premium, glassmorphism, bordas sutis rgba(255,255,255,0.
 
 ### Tela 1 — Home / Landing Page
 
-![FundamentAI — Home / Landing Page](docs/tela-home.png)
-
 > Exibe headline, barra de busca com chips de exemplo (PETR4, VALE3, ITUB4, HGLG11) e os 3 cards de features (Dados Consolidados, Score Fundamentalista, Análise por IA).
 
 ---
 
 ### Tela 2 — Dashboard de Análise
-
-![FundamentAI — Dashboard de Análise](docs/Telas1/1.Analise.png)
 
 > Dashboard principal com grid 2 colunas: coluna esquerda (hero do ticker, indicadores, score) e coluna direita (diagnóstico da IA, pontos fortes/atenção, histórico de preços).
 
@@ -60,15 +56,11 @@ Estilo:            Dark premium, glassmorphism, bordas sutis rgba(255,255,255,0.
 
 ### Tela 3 — Loading
 
-![FundamentAI — Tela de Loading](docs/2.Loading.png)
-
 > Tela de carregamento com spinner animado, texto "Processando Inteligência de Mercado..." e etapas de progresso (Coletar → Calcular → IA).
 
 ---
 
 ### Tela 4 — Aviso / Erro
-
-![FundamentAI — Tela de Erro](docs/3.AvisoError.png)
 
 > Feedback para ticker não encontrado, ativo inativo ou erro de conexão. Card centralizado com ícone, mensagem explicativa e botão de ação.
 
@@ -76,15 +68,11 @@ Estilo:            Dark premium, glassmorphism, bordas sutis rgba(255,255,255,0.
 
 ### Tela 5 — Indicadores por Tipo de Ativo
 
-![FundamentAI — Indicadores por Tipo](docs/4.Indicadores.png)
-
 > Componente com dois estados: badge AÇÃO (teal) com 6 indicadores e badge FII (roxo) com 4 indicadores específicos, cada um com tooltip explicativo.
 
 ---
 
 ### Mockup Geral
-
-![FundamentAI — Mockup Geral](docs/gMock.jpeg)
 
 > Visão geral do produto com todas as telas e fluxo de navegação.
 
