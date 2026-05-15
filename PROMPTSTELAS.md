@@ -52,7 +52,7 @@ Banco de dados atualizado diariamente após o fechamento do mercado (19h, horár
 
 ---
 
-## 📏 Wireframes — Estrutura de Layout (tons de cinza)
+## 📏 Wireframes — Estrutura de Layout (verde, roxo, laranja, amarelo)
 
 ---
 
@@ -63,8 +63,9 @@ Banco de dados atualizado diariamente após o fechamento do mercado (19h, horár
 ```
 UI/UX wireframe of a financial web application dashboard, landing page for stock analysis,
 prominent large search bar in the center for stock tickers, educational banners below,
-list of recently analyzed assets in small cards, grayscale, minimalist, sketch style,
-clean layout, placeholder text, web design --ar 16:9
+list of recently analyzed assets in small cards, greenscale, purple, orange, yellow,
+clean grid structure, minimalist, sketch style, clean layout, placeholder text,
+web design --ar 16:9
 ```
 
 ---
@@ -76,8 +77,8 @@ clean layout, placeholder text, web design --ar 16:9
 ```
 UI/UX wireframe of a stock asset details screen, top header with ticker name and a large
 circular score gauge from 0 to 100, grid of fundamental indicators below like P/E and ROE,
-line chart for historical prices at the bottom, web design, grayscale, clean grid structure,
-clear hierarchy --ar 16:9
+line chart for historical prices at the bottom, web design, greenscale, purple, orange,
+yellow, clean grid structure, clear hierarchy --ar 16:9
 ```
 
 ---
@@ -89,8 +90,8 @@ clear hierarchy --ar 16:9
 ```
 UI/UX wireframe of a Real Estate Fund details screen for a financial app, top header with
 ticker name and overall score, prominent indicator boxes for Dividend Yield and P/VP,
-bar chart for historical dividends distribution, web design layout, grayscale,
-structured and organized --ar 16:9
+bar chart for historical dividends distribution, web design layout, greenscale, purple,
+orange, yellow, clean grid structure, structured and organized --ar 16:9
 ```
 
 ---
@@ -102,8 +103,8 @@ structured and organized --ar 16:9
 ```
 UI/UX wireframe of an AI analysis panel in a financial web app, large text blocks for AI
 verdict, risk assessment section, educational tooltips next to terms, macro economic data
-section showing interest rates, clean web layout, grayscale, structured text hierarchy
---ar 16:9
+section showing interest rates, clean web layout, greenscale, purple, orange, yellow,
+clean grid structure, structured text hierarchy --ar 16:9
 ```
 
 ---
@@ -115,8 +116,8 @@ section showing interest rates, clean web layout, grayscale, structured text hie
 ```
 UI/UX wireframe of an empty state or error screen for a financial app, soft warning
 illustration in the center, message box explaining "Ticker Inactive or Insufficient Data",
-clean minimalist design, single "Go Back to Home" button, grayscale, simple web design
---ar 16:9
+clean minimalist design, single "Go Back to Home" button, greenscale, purple, orange,
+yellow, clean grid structure, simple web design --ar 16:9
 ```
 
 ---
