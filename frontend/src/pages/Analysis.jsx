@@ -43,11 +43,12 @@ const ASSET_INFO = {
 // Descrição genérica para tickers não mapeados
 function getAssetInfo(ticker, name, sector, assetType) {
   if (ASSET_INFO[ticker]) return ASSET_INFO[ticker];
+  const isFii = ticker && ticker.endsWith('11');
   return {
     name: name || ticker,
-    type: assetType === 'fii' ? 'FII' : 'Ação',
-    sector: sector || 'B3',
-    desc: `${name || ticker} é um ativo listado na B3 no setor de ${sector || 'mercado financeiro'}. O Score Fundamentalista consolida os principais indicadores financeiros em uma nota de 0 a 100, ponderando eficiência, lucratividade, endividamento e geração de renda. Consulte os indicadores detalhados nas abas abaixo para uma análise completa.`,
+    type: assetType === 'fii' || isFii ? 'FII' : 'Ação',
+    sector: sector || (isFii ? 'Fundos Imobiliários' : 'B3'),
+    desc: `${name || ticker} é um ativo listado na B3 no setor de ${sector || (isFii ? 'Fundos Imobiliários' : 'mercado financeiro')}. O Score Fundamentalista consolida os principais indicadores financeiros em uma nota de 0 a 100, ponderando eficiência, lucratividade, endividamento e geração de renda. Consulte os indicadores detalhados nas abas abaixo para uma análise completa.`,
     highlight: `Ativo listado na B3 — consulte os indicadores para análise completa.`,
   };
 }
@@ -456,8 +457,17 @@ export default function Analysis({ ticker, onSearch }) {
       setTickerData(td);
       setAnalysis(ad);
     } catch {
-      // Backend unavailable — use mock data
-      setTickerData({ ...MOCK_DATA, ticker: symbol });
+      // Backend unavailable — use mock data with correct ticker info
+      const isFii = symbol.endsWith('11');
+      const knownInfo = ASSET_INFO[symbol];
+      setTickerData({
+        ...MOCK_DATA,
+        ticker: symbol,
+        name: knownInfo?.name || null,
+        sector: knownInfo?.sector || null,
+        segment: null,
+        asset_type: isFii ? 'fii' : 'stock',
+      });
       setAnalysis(MOCK_ANALYSIS);
     } finally {
       setLoading(false);
