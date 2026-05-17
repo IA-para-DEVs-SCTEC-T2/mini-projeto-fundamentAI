@@ -91,6 +91,21 @@ def collect_stock_data(symbol: str) -> dict | None:
             except Exception:
                 return None
 
+        ev_ebitda_raw = safe("EV_EBITDA", zero_is_null=True)
+        enterprise_value_raw = safe("Valor_da_firma")
+        net_debt_raw = safe("Div_Liquida")
+
+        # Deriva EBITDA e Dívida/EBITDA a partir de EV e EV/EBITDA
+        # EBITDA = Valor_da_firma / EV_EBITDA
+        # Dívida/EBITDA = Div_Liquida / EBITDA
+        debt_ebitda_derived = None
+        if (ev_ebitda_raw is not None and ev_ebitda_raw > 0
+                and enterprise_value_raw is not None and enterprise_value_raw > 0
+                and net_debt_raw is not None):
+            ebitda_derived = enterprise_value_raw / ev_ebitda_raw
+            if ebitda_derived > 0:
+                debt_ebitda_derived = net_debt_raw / ebitda_derived
+
         return {
             "symbol": symbol,
             "asset_type": "stock",
@@ -100,12 +115,12 @@ def collect_stock_data(symbol: str) -> dict | None:
             "b3_type": safe("Tipo"),
             "current_price": safe("Cotacao"),
             "market_cap": safe("Valor_de_mercado"),
-            "enterprise_value": safe("Valor_da_firma"),
+            "enterprise_value": enterprise_value_raw,
             "shares_outstanding": safe("Nro_Acoes"),
             # Valuation — zero significa dado ausente no fundamentus
             "pe_ratio": safe("PL", zero_is_null=True),
             "pb_ratio": safe("PVP", zero_is_null=True),
-            "ev_ebitda": safe("EV_EBITDA", zero_is_null=True),
+            "ev_ebitda": ev_ebitda_raw,
             # Rentabilidade
             "roe": safe("ROE"),
             "roic": safe("ROIC"),
@@ -113,6 +128,7 @@ def collect_stock_data(symbol: str) -> dict | None:
             "ebit_margin": safe("Marg_EBIT"),
             # Endividamento
             "debt_equity": safe("Div_Liq_Patrim"),
+            "debt_ebitda": debt_ebitda_derived,   # derivado de EV/EV_EBITDA
             # Dividendos
             "dividend_yield": safe("Div_Yield"),
             # Crescimento
@@ -121,7 +137,7 @@ def collect_stock_data(symbol: str) -> dict | None:
             "total_assets": safe("Ativo"),
             "cash": safe("Disponibilidades"),
             "gross_debt": safe("Div_Bruta"),
-            "net_debt": safe("Div_Liquida"),
+            "net_debt": net_debt_raw,
             "total_equity": safe("Patrim_Liq"),
             # DRE 12m
             "revenue": safe("Receita_Liquida_12m"),
@@ -226,11 +242,11 @@ def persist_ticker_data(db, data: dict) -> bool:
             indicators = {
                 "pe_ratio": data.get("pe_ratio"),
                 "roe": data.get("roe"),
-                "debt_ebitda": None,  # Calculado via net_debt/ebit (sem EBITDA direto)
+                "debt_ebitda": data.get("debt_ebitda"),  # derivado de Div_Liquida / (EV / EV_EBITDA)
                 "net_margin": data.get("net_margin"),
                 "ev_ebitda": data.get("ev_ebitda"),
                 "dividend_yield": data.get("dividend_yield"),
-                "net_income_growth_yoy": None,  # Requer histórico yfinance
+                "net_income_growth_yoy": None,  # Requer histórico yfinance (update_income_growth)
                 "pb_ratio": data.get("pb_ratio"),
                 "revenue_growth_yoy": data.get("revenue_growth_5y"),
             }

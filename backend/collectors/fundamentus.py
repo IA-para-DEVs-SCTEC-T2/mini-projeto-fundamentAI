@@ -10,6 +10,13 @@ Uso:
 
     fundamentals = get_fundamentals("PETR4")
     sector = get_sector("PETR4")
+
+Formato dos dados retornados pelo fundamentus 0.3.x:
+    - Campos de valuation (PL, PVP, EV_EBITDA, etc.): string inteira ×100
+      Ex: "545" = P/L 5.45, "132" = P/VP 1.32
+    - Percentuais (ROE, Margem, DY): string com "%" e ponto decimal
+      Ex: "24.2%" = ROE 24.2% = 0.242 em decimal
+    - Valores monetários (Cotacao, Patrim_Liq, etc.): float ou string numérica
 """
 
 import logging
@@ -20,41 +27,50 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 # Mapeamento de colunas do fundamentus para nomes padronizados do sistema
-# Baseado nas colunas reais retornadas pela biblioteca fundamentus 0.3.x
 _COLUMN_MAP = {
-    # Valuation
-    "PL": "pe_ratio",
-    "PVP": "pb_ratio",
-    "PEBIT": "p_ebit",
-    "PSR": "psr",
-    "PAtivos": "p_assets",
-    "PCap_Giro": "p_working_capital",
-    "PAtiv_Circ_Liq": "p_net_current_assets",
-    "EV_EBIT": "ev_ebit",
-    "EV_EBITDA": "ev_ebitda",
-    # Rentabilidade
-    "ROE": "roe",
-    "ROIC": "roic",
-    "Marg_Liquida": "net_margin",
-    "Marg_EBIT": "ebit_margin",
-    "Marg_Bruta": "gross_margin",
+    # Valuation (vêm como inteiro ×100 — ex: "545" = 5.45)
+    "PL":              "pe_ratio",
+    "PVP":             "pb_ratio",
+    "PEBIT":           "p_ebit",
+    "PSR":             "psr",
+    "PAtivos":         "p_assets",
+    "PCap_Giro":       "p_working_capital",
+    "PAtiv_Circ_Liq":  "p_net_current_assets",
+    "EV_EBIT":         "ev_ebit",
+    "EV_EBITDA":       "ev_ebitda",
+    # Rentabilidade (vêm como percentual — ex: "24.2%" = 0.242)
+    "ROE":             "roe",
+    "ROIC":            "roic",
+    "Marg_Liquida":    "net_margin",
+    "Marg_EBIT":       "ebit_margin",
+    "Marg_Bruta":      "gross_margin",
+    "EBIT_Ativo":      "ebit_assets",
     # Endividamento
-    "Div_Liq_Patrim": "debt_equity",
-    "Liquidez_Corr": "current_ratio",
-    # Crescimento
-    "Cres_Rec_5a": "revenue_growth_5y",
+    "Div_Liq_Patrim":  "debt_equity",
+    "Liquidez_Corr":   "current_ratio",
+    # Crescimento (percentual)
+    "Cres_Rec_5a":     "revenue_growth_5y",
+    # Dividendos (percentual)
+    "Div_Yield":       "dividend_yield",
     # Outros
-    "Div_Yield": "dividend_yield",
-    "Giro_Ativos": "asset_turnover",
-    # Dados financeiros adicionais
-    "LPA": "eps",
-    "VPA": "book_value_per_share",
-    "Div_Liquida": "net_debt",
-    "Patrim_Liq": "total_equity",
+    "Giro_Ativos":     "asset_turnover",
+    "LPA":             "eps",
+    "VPA":             "book_value_per_share",
+    "Div_Liquida":     "net_debt",
+    "Patrim_Liq":      "total_equity",
     "Receita_Liquida_12m": "revenue",
-    "Lucro_Liquido_12m": "net_income",
-    "Cotacao": "current_price",
+    "Lucro_Liquido_12m":   "net_income",
+    "Cotacao":         "current_price",
 }
+
+# Campos de valuation que o fundamentus retorna como inteiro ×100
+# Ex: "545" = P/L 5.45, "132" = P/VP 1.32, "835" = LPA 8.35
+_VALUATION_COLS = frozenset({
+    "PL", "PVP", "PEBIT", "PSR", "PAtivos", "PCap_Giro",
+    "PAtiv_Circ_Liq", "EV_EBIT", "EV_EBITDA",
+    # Outros campos que também vêm ×100
+    "LPA", "VPA", "Div_Liq_Patrim", "Liquidez_Corr", "Giro_Ativos", "EBIT_Ativo",
+})
 
 
 def get_fundamentals(ticker: str) -> dict:
@@ -68,22 +84,17 @@ def get_fundamentals(ticker: str) -> dict:
         Dicionário com indicadores normalizados:
         - pe_ratio: P/L (Preço / Lucro)
         - pb_ratio: P/VP (Preço / Valor Patrimonial)
-        - roe: Retorno sobre Patrimônio (decimal, ex: 0.15 = 15%)
+        - roe: Retorno sobre Patrimônio (decimal, ex: 0.242 = 24.2%)
         - roic: Retorno sobre Capital Investido (decimal)
         - net_margin: Margem Líquida (decimal)
-        - debt_equity: Dívida Bruta / Patrimônio
+        - ev_ebitda: EV/EBITDA
         - dividend_yield: Dividend Yield (decimal)
         - revenue_growth_5y: Crescimento de receita em 5 anos (decimal)
-        - raw: DataFrame original do fundamentus
+        - raw: Series original do fundamentus
 
     Raises:
         ValueError: Se o ticker for inválido ou não for uma ação da B3.
         RuntimeError: Se houver erro na comunicação com o fundamentus.
-
-    Exemplo:
-        >>> data = get_fundamentals("ITUB4")
-        >>> print(f"ROE: {data['roe']:.1%}")
-        ROE: 18.5%
     """
     ticker = ticker.upper().strip()
 
@@ -92,11 +103,12 @@ def get_fundamentals(ticker: str) -> dict:
 
         result = fundamentus.get_papel(ticker)
 
-        # fundamentus 0.3.x retorna DataFrame com o ticker como índice de linha
         if isinstance(result, pd.DataFrame):
             if result.empty:
-                raise ValueError(f"Ticker '{ticker}' não encontrado no fundamentus. Verifique se é uma ação da B3.")
-            # Extrai a primeira linha como Series
+                raise ValueError(
+                    f"Ticker '{ticker}' não encontrado no fundamentus. "
+                    "Verifique se é uma ação da B3."
+                )
             row = result.iloc[0]
         else:
             row = result
@@ -124,11 +136,6 @@ def get_sector(ticker: str) -> Optional[str]:
 
     Returns:
         Nome do setor ou None se não disponível.
-
-    Exemplo:
-        >>> sector = get_sector("PETR4")
-        >>> print(sector)
-        "Petróleo, Gás e Biocombustíveis"
     """
     ticker = ticker.upper().strip()
 
@@ -141,21 +148,13 @@ def get_sector(ticker: str) -> Optional[str]:
             logger.warning("Setor não encontrado para %s", ticker)
             return None
 
-        if isinstance(result, pd.DataFrame):
-            row = result.iloc[0]
-        else:
-            row = result
+        row = result.iloc[0] if isinstance(result, pd.DataFrame) else result
 
-        # Tenta diferentes nomes de coluna para setor (fundamentus 0.3.x usa "Setor")
         for col in ["Setor", "setor", "Segmento", "segmento"]:
             if isinstance(row, pd.Series) and col in row.index:
-                val = row[col]
-                if val and str(val).strip() and str(val).strip() != "nan":
-                    return str(val).strip()
-            elif isinstance(row, pd.DataFrame) and col in row.columns:
-                val = row[col].iloc[0]
-                if val and str(val).strip() and str(val).strip() != "nan":
-                    return str(val).strip()
+                val = str(row[col]).strip()
+                if val and val not in ("nan", "-", ""):
+                    return val
 
         return None
 
@@ -168,15 +167,9 @@ def get_all_tickers() -> pd.DataFrame:
     """
     Retorna todos os tickers disponíveis no fundamentus com seus indicadores.
 
-    Útil para comparação setorial — permite obter médias do setor.
-
     Returns:
         DataFrame com todos os tickers e seus indicadores.
         Retorna DataFrame vazio em caso de falha.
-
-    Exemplo:
-        >>> all_tickers = get_all_tickers()
-        >>> print(f"Total de tickers: {len(all_tickers)}")
     """
     try:
         import fundamentus  # type: ignore
@@ -198,47 +191,41 @@ def get_all_tickers() -> pd.DataFrame:
 def _normalize_fundamentus_data(row: pd.Series, ticker: str) -> dict:
     """
     Normaliza os dados brutos do fundamentus para o formato padrão do sistema.
-
-    Converte percentuais de string para float decimal (ex: "15,3%" → 0.153).
-    Indicadores de valuation (P/L, P/VP, EV/EBITDA) tratam zero como None,
-    pois o fundamentus usa "000" para indicadores sem dado real.
-
-    Args:
-        row: Linha do DataFrame do fundamentus.
-        ticker: Símbolo para logging.
-
-    Returns:
-        Dicionário com indicadores normalizados.
     """
-    # Indicadores de valuation onde zero = dado ausente
-    _ZERO_IS_NULL_COLS = {"PL", "PVP", "PEBIT", "PSR", "PAtivos", "PCap_Giro",
-                          "PAtiv_Circ_Liq", "EV_EBIT", "EV_EBITDA"}
-
     normalized: dict = {"ticker": ticker, "raw": row}
 
     for original_col, system_col in _COLUMN_MAP.items():
-        zero_is_null = original_col in _ZERO_IS_NULL_COLS
-        value = _safe_get(row, original_col, zero_is_null=zero_is_null)
+        is_valuation = original_col in _VALUATION_COLS
+        value = _safe_get(row, original_col,
+                          zero_is_null=is_valuation,
+                          divide_100=is_valuation)
         normalized[system_col] = value
 
     return normalized
 
 
-def _safe_get(row: pd.Series, key: str, zero_is_null: bool = False) -> Optional[float]:
+def _safe_get(row: pd.Series, key: str, zero_is_null: bool = False,
+              divide_100: bool = False) -> Optional[float]:
     """
     Extrai e converte um valor de uma linha do fundamentus com segurança.
 
-    Trata:
-    - Percentuais com vírgula: "15,3%" → 0.153
-    - Valores com vírgula decimal: "1.234,56" → 1234.56
-    - "000" → None (fundamentus usa "000" para indicadores sem dado)
-    - Valores ausentes ou inválidos → None
+    Regras de conversão:
+    - Campos de valuation (divide_100=True): string inteira ×100
+        "545" → 545.0 / 100 = 5.45
+        "000" → None (dado ausente)
+    - Percentuais: string com "%" e ponto decimal
+        "24.2%" → remove "%" e "." → "242" → 242.0 / 1000 = 0.242
+        "7.0%"  → "70"  → 70.0  / 1000 = 0.07
+        "-5.3%" → "-53" → -53.0 / 1000 = -0.053
+    - Valores monetários: float ou string numérica padrão
+        45.47 → 45.47
+        "1.234,56" → remove "." → "1234,56" → replace "," → "1234.56" → 1234.56
 
     Args:
         row: Linha do DataFrame.
         key: Nome da coluna.
-        zero_is_null: Se True, trata 0.0 como None (para indicadores de valuation
-                      onde "000" no fundamentus significa dado ausente).
+        zero_is_null: Se True, trata 0.0 como None.
+        divide_100: Se True, divide por 100 (campos de valuation ×100).
 
     Returns:
         Float normalizado ou None.
@@ -252,9 +239,12 @@ def _safe_get(row: pd.Series, key: str, zero_is_null: bool = False) -> Optional[
         if value is None or (isinstance(value, float) and pd.isna(value)):
             return None
 
+        # Valor já numérico (float/int)
         if isinstance(value, (int, float)):
             num = float(value)
-            return None if (zero_is_null and num == 0.0) else num
+            if zero_is_null and num == 0.0:
+                return None
+            return num / 100 if divide_100 else num
 
         # Converte string
         value_str = str(value).strip()
@@ -262,15 +252,23 @@ def _safe_get(row: pd.Series, key: str, zero_is_null: bool = False) -> Optional[
             return None
 
         is_percent = value_str.endswith("%")
-        value_str = value_str.replace("%", "").replace(".", "").replace(",", ".").strip()
 
-        result = float(value_str)
+        # Remove separador de milhar (ponto) e símbolo de percentual
+        # Substitui vírgula decimal por ponto
+        clean = value_str.replace("%", "").replace(".", "").replace(",", ".").strip()
+
+        result = float(clean)
 
         if zero_is_null and result == 0.0:
             return None
 
-        # Percentuais do fundamentus já vêm como decimal (ex: 0.153 = 15.3%)
-        if is_percent and abs(result) > 1:
+        if is_percent:
+            # "24.2%" → clean="242" → 242.0 → /1000 = 0.242
+            # O replace(".", "") transforma "24.2" em "242" (remove o ponto decimal),
+            # então o valor está ×10 em relação ao percentual real.
+            # Para converter para decimal: /10 (desfaz o ×10) /100 (% → decimal) = /1000
+            result = result / 1000
+        elif divide_100:
             result = result / 100
 
         return result
