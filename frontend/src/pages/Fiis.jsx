@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Building2, Search, ArrowUpDown, X } from 'lucide-react';
 import ScoreRing, { scoreLabel } from '../components/ScoreRing';
+import AssetLogo from '../components/AssetLogo';
 
 // ── Mock data (Etapa 4 substitui por API) ────────────────────────────────────
 const MOCK_FIIS = [
@@ -196,10 +197,13 @@ export default function Fiis({ onSearch }) {
             return (
               <button key={f.ticker} className="acoes-card fii-card" onClick={() => onSearch(f.ticker)}>
                 <div className="acoes-card-top">
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div className="acoes-card-ticker">{f.ticker}</div>
-                    <div className="acoes-card-name" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{f.name}</div>
-                    <div className="acoes-card-sector fii-segment-tag">{f.segment}</div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', minWidth: 0, flex: 1 }}>
+                    <AssetLogo ticker={f.ticker} sector={f.segment} size={32} />
+                    <div style={{ minWidth: 0 }}>
+                      <div className="acoes-card-ticker">{f.ticker}</div>
+                      <div className="acoes-card-name" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>{f.name}</div>
+                      <div className="acoes-card-sector fii-segment-tag">{f.segment}</div>
+                    </div>
                   </div>
                   <div className="acoes-card-score" style={{ color, flexShrink: 0 }}>
                     <ScoreRing score={f.score} size={48} color={color} />

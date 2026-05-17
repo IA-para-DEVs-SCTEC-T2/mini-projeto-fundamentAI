@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Search, TrendingUp, TrendingDown,
   Database, Cpu, BarChart2,
@@ -7,14 +7,16 @@ import {
 } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
 import ScoreRing, { scoreLabel } from '../components/ScoreRing';
+import AssetLogo from '../components/AssetLogo';
 
-/* ── Filtros de análise ── */
+/* ── Filtros de análise — com função real ── */
 const FILTERS = [
-  { id: 'macro',       icon: Globe,    label: 'Macro' },
-  { id: 'graficos',    icon: BarChart, label: 'Gráficos' },
-  { id: 'volatilidade',icon: Waves,    label: 'Volatilidade' },
-  { id: 'score',       icon: Star,     label: 'Score' },
-  { id: 'dividendos',  icon: TrendingUp, label: 'Dividendos' },
+  { id: 'todos',       icon: Globe,      label: 'Todos' },
+  { id: 'score',       icon: Star,       label: 'Maior Score',   sort: (a, b) => b.score - a.score },
+  { id: 'dividendos',  icon: TrendingUp, label: 'Dividendos',    filter: (a) => a.indicators?.['DY'] },
+  { id: 'graficos',    icon: BarChart,   label: 'Ações',         filter: (a) => a.type === 'stock' },
+  { id: 'fiis',        icon: BarChart2,  label: 'FIIs',          filter: (a) => a.type === 'fii' },
+  { id: 'volatilidade',icon: Waves,      label: 'Alta Variação', sort: (a, b) => Math.abs(b.change) - Math.abs(a.change) },
 ];
 
 /* ── Mais pesquisados ── */
@@ -142,7 +144,8 @@ function DashboardCard({ asset, onSearch }) {
 
       <div className="dash-card-header">
         <div className="dash-card-identity">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <AssetLogo ticker={asset.ticker} sector={asset.sector} size={28} />
             <span className="dash-ticker">{asset.ticker}</span>
             <span className={asset.type === 'fii' ? 'badge-fii' : 'badge-stock'}>
               {asset.type === 'fii' ? 'FII' : 'AÇÃO'}
@@ -211,8 +214,16 @@ function DashboardCard({ asset, onSearch }) {
 /* ── Main ── */
 export default function Home({ onSearch, onFavorite }) {
   const [input, setInput]         = useState('');
-  const [activeFilter, setFilter] = useState('score');
+  const [activeFilter, setFilter] = useState('todos');
   const [favorites, setFavorites] = useState([]);
+
+  const filteredAssets = useMemo(() => {
+    const f = FILTERS.find((fi) => fi.id === activeFilter);
+    if (!f) return FEATURED_ASSETS;
+    let list = f.filter ? FEATURED_ASSETS.filter(f.filter) : [...FEATURED_ASSETS];
+    if (f.sort) list = [...list].sort(f.sort);
+    return list;
+  }, [activeFilter]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -286,7 +297,7 @@ export default function Home({ onSearch, onFavorite }) {
       </div>
 
       <div className="dash-grid" style={{ width: '100%' }}>
-        {FEATURED_ASSETS.map((a) => (
+        {filteredAssets.map((a) => (
           <DashboardCard key={a.ticker} asset={a} onSearch={onSearch}/>
         ))}
       </div>

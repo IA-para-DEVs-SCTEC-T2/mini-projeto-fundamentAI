@@ -613,3 +613,208 @@
   .analysis-tabs { gap: 0; }
   .analysis-tab { padding: 0.65rem 0.75rem; font-size: 0.82rem; }
 }
+
+/* ══════════════════════════════════════════════
+   SCORE MODAL — "Saiba mais"
+══════════════════════════════════════════════ */
+
+.score-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: fadeIn 0.2s ease;
+}
+
+.score-modal {
+  background: #0d1117;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+/* Header */
+.score-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.score-modal-type-badge {
+  font-size: 0.72rem;
+  color: #2196F3;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.3rem;
+}
+
+.score-modal-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.score-modal-close {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #A0A0A0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.score-modal-close:hover { background: rgba(255,82,82,0.15); color: #FF5252; }
+
+/* Score row */
+.score-modal-score-row {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1rem 1.25rem;
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.score-modal-score-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 4px solid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #0a0f0d;
+}
+
+.score-modal-score-num {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.score-modal-score-lbl {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+.score-modal-highlight { flex: 1; }
+
+.score-modal-highlight-label {
+  font-size: 0.7rem;
+  color: #FFD600;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 0.3rem;
+}
+
+.score-modal-highlight-text {
+  font-size: 0.85rem;
+  color: #E8F5E9;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* Description */
+.score-modal-desc {
+  font-size: 0.88rem;
+  color: #A0A0A0;
+  line-height: 1.7;
+  padding: 1rem 1.25rem;
+  background: rgba(255,255,255,0.02);
+  border-radius: 10px;
+  border-left: 3px solid #2196F3;
+}
+
+/* Explanation */
+.score-modal-explanation {
+  background: rgba(0,200,83,0.05);
+  border: 1px solid rgba(0,200,83,0.15);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.score-modal-exp-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #00C853;
+}
+
+.score-modal-exp-text {
+  font-size: 0.82rem;
+  color: #A0A0A0;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.score-modal-ranges {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.score-modal-range-item {
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 0.4rem 0.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.72rem;
+  background: rgba(255,255,255,0.02);
+}
+
+/* Footer */
+.score-modal-footer {
+  font-size: 0.72rem;
+  color: #6b7280;
+  text-align: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .score-modal { padding: 1.25rem; }
+  .score-modal-ranges { grid-template-columns: repeat(2, 1fr); }
+  .score-modal-score-row { flex-direction: column; text-align: center; }
+}

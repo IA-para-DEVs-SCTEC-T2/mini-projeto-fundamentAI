@@ -6,12 +6,13 @@ import Home from './pages/Home';
 import Analysis from './pages/Analysis';
 import Acoes from './pages/Acoes';
 import Fiis from './pages/Fiis';
+import Aprendizado from './pages/Aprendizado';
 import './index.css';
 
 export default function App() {
   const [ticker, setTicker]   = useState(null);
   const [history, setHistory] = useState([]);
-  const [view, setView]       = useState('home');   // 'home' | 'analysis' | 'acoes' | 'fiis'
+  const [view, setView]       = useState('home');   // 'home' | 'analysis' | 'acoes' | 'fiis' | 'aprendizado'
   const [activeNav, setNav]   = useState('home');
 
   const handleSearch = (symbol) => {
@@ -39,8 +40,10 @@ export default function App() {
       setView('acoes');
     } else if (id === 'fiis') {
       setView('fiis');
+    } else if (id === 'aprendizado') {
+      setView('aprendizado');
     } else {
-      // favoritos / aprendizado → próximas etapas
+      // favoritos → próximas etapas
       setView('home');
     }
   };
@@ -57,11 +60,20 @@ export default function App() {
         />
 
         <div className="app-content">
-          {view === 'home'     && <Home onSearch={handleSearch} />}
-          {view === 'acoes'    && <Acoes onSearch={handleSearch} />}
-          {view === 'fiis'     && <Fiis onSearch={handleSearch} />}
+          {view === 'home'        && <Home onSearch={handleSearch} />}
+          {view === 'acoes'       && <Acoes onSearch={handleSearch} />}
+          {view === 'fiis'        && <Fiis onSearch={handleSearch} />}
+          {view === 'aprendizado' && (
+            <Aprendizado
+              ticker={ticker}
+              onBack={() => setView(ticker ? 'analysis' : 'home')}
+            />
+          )}
           {view === 'analysis' && ticker && (
-            <Analysis ticker={ticker} onSearch={handleSearch} />
+            <Analysis
+              ticker={ticker}
+              onSearch={handleSearch}
+            />
           )}
         </div>
       </div>

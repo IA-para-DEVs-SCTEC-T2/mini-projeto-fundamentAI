@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { TrendingUp, Search, ArrowUpDown, X } from 'lucide-react';
 import ScoreRing, { scoreLabel } from '../components/ScoreRing';
+import AssetLogo from '../components/AssetLogo';
 
 // ── Mock data expandido (Etapa 4 substitui por API) ─────────────────────────
 const MOCK_ACOES = [
@@ -191,12 +192,15 @@ export default function Acoes({ onSearch }) {
             return (
               <button key={a.ticker} className="acoes-card" onClick={() => onSearch(a.ticker)}>
                 <div className="acoes-card-top">
-                  <div>
-                    <div className="acoes-card-ticker">{a.ticker}</div>
-                    <div className="acoes-card-name">{a.name}</div>
-                    <div className="acoes-card-sector">{a.sector}</div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', minWidth: 0, flex: 1 }}>
+                    <AssetLogo ticker={a.ticker} sector={a.sector} size={34} />
+                    <div style={{ minWidth: 0 }}>
+                      <div className="acoes-card-ticker">{a.ticker}</div>
+                      <div className="acoes-card-name">{a.name}</div>
+                      <div className="acoes-card-sector">{a.sector}</div>
+                    </div>
                   </div>
-                  <div className="acoes-card-score" style={{ color }}>
+                  <div className="acoes-card-score" style={{ color, flexShrink: 0 }}>
                     <ScoreRing score={a.score} size={52} color={color} />
                     <span className="acoes-score-lbl">{label}</span>
                   </div>
