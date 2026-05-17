@@ -166,3 +166,132 @@
 
 > Relatório gerado automaticamente por `backend/scripts/generate_report.py` em 2026-05-17 18:47.
 > Para atualizar: `python -m backend.scripts.generate_report`
+
+---
+
+## 10. Análise Crítica — Viabilidade do Projeto como Fonte de Análise
+
+> ⚠️ **Esta seção requer decisão do time.** Os dados abaixo evidenciam limitações estruturais que impactam diretamente a confiabilidade dos scores gerados.
+
+### 10.1 O Problema Central: Scores Construídos sobre Estimativas
+
+O score fundamentalista é calculado com **7 indicadores para ações** e **4 para FIIs**. Quando um indicador está ausente, o sistema atribui **50 pontos (neutro)** — um valor estimado, não real.
+
+O resultado prático é que **a maioria dos scores não reflete a realidade financeira da empresa**, mas sim uma média entre os poucos indicadores disponíveis e estimativas neutras para os ausentes.
+
+#### Quanto do score de uma ação típica é real vs estimado?
+
+| Indicador | Peso | Cobertura real | Tickers com valor estimado |
+|---|---|---|---|
+| ROE | 20% | 82.8% | ~161 ações |
+| Margem Líquida | 15% | 54.5% | ~427 ações |
+| **Dívida/EBITDA** | **15%** | **0.0%** | **938 ações (100%)** |
+| P/L | 15% | 30.2% | ~655 ações |
+| **CAGR Lucro** | **15%** | **29.5%** | **~661 ações** |
+| EV/EBITDA | 10% | 5.3% | ~888 ações |
+| Dividend Yield | 10% | 92.6% | ~69 ações |
+
+> **Para uma ação mediana da B3:** ROE ✅ + DY ✅ + Margem ⚠️ + os outros 4 estimados = **score com 55% do peso baseado em estimativas neutras.**
+
+> **Para uma ação sem P/L, P/VP, EV/EBITDA, Dívida/EBITDA e CAGR** (cenário comum): score calculado com apenas ROE + DY = **apenas 30% do peso com dados reais.**
+
+---
+
+### 10.2 Indicadores Críticos Ausentes e Suas Implicações
+
+#### Dívida/EBITDA — 0% de cobertura (938 ações)
+
+Este é o indicador de **risco financeiro** mais importante da análise. Sem ele, o sistema não consegue distinguir:
+- Uma empresa saudável com caixa líquido positivo
+- Uma empresa altamente alavancada à beira da insolvência
+
+**Impacto:** empresas com dívida crítica recebem o mesmo score neutro (50) que empresas sem dívida. O score não penaliza alavancagem excessiva.
+
+#### EV/EBITDA — 5.3% de cobertura (888 ações sem dado)
+
+Indicador de **valuation relativo** — mede se a empresa está cara ou barata em relação à sua geração de caixa operacional. Sem ele, o sistema não consegue identificar empresas sobrevalorizadas.
+
+#### P/L e P/VP — ~30% de cobertura
+
+Indicadores básicos de valuation. Com 70% das ações sem P/L, o sistema não consegue avaliar se o preço de mercado é justo em relação ao lucro ou ao patrimônio.
+
+#### CAGR de Lucro — 29.5% de cobertura
+
+Sem histórico de crescimento, o sistema não distingue empresas em expansão de empresas em declínio.
+
+---
+
+### 10.3 Evidências de Viés nos Scores
+
+#### Ações "Excelente" sem dados de valuation
+
+Observando o Top 20 de ações (seção 5), **nenhuma das 26 ações "Excelente" tem P/L preenchido**. Isso significa que o score alto foi construído principalmente sobre ROE elevado + DY elevado + CAGR de lucro — sem qualquer avaliação de se o preço de mercado é justo.
+
+Uma empresa pode ter ROE de 180% e DY de 80% e ainda assim estar **extremamente sobrevalorizada** — e o sistema atual classificaria como "Excelente".
+
+#### FIIs com scores inflados por P/VP ausente
+
+53.3% dos FIIs são classificados como "Excelente". O P/VP — indicador mais importante para FIIs (peso 30%) — está ausente em **80.6% dos FIIs**. Isso significa que o score "Excelente" de muitos FIIs ignora completamente se a cota está sendo negociada com prêmio ou desconto sobre o patrimônio.
+
+#### Score mínimo artificialmente alto
+
+O score mínimo observado é **18.3** (não zero). Isso ocorre porque mesmo empresas com todos os indicadores negativos recebem score neutro (50) nos indicadores ausentes, elevando o piso artificialmente.
+
+---
+
+### 10.4 Comparação: Projeto Analítico vs Projeto Educacional
+
+| Critério | Projeto Analítico | Projeto Educacional |
+|---|---|---|
+| **Precisão dos scores** | Requer dados reais em ≥ 5/7 indicadores | Scores estimados são aceitáveis como exemplo |
+| **Dívida/EBITDA** | Obrigatório — risco financeiro crítico | Pode ser omitido com aviso |
+| **Responsabilidade** | Alta — usuário pode tomar decisões financeiras | Baixa — contexto de aprendizado |
+| **Disclaimer** | Insuficiente apenas no texto | Suficiente com disclaimer claro |
+| **Cobertura atual** | ❌ Insuficiente (55%+ estimado) | ✅ Aceitável com transparência |
+| **Fontes gratuitas** | ❌ Limitadas para dados completos | ✅ Adequadas para fins didáticos |
+
+---
+
+### 10.5 Caminhos Possíveis
+
+#### Opção A — Manter como projeto educacional (menor esforço)
+
+- Adicionar aviso explícito no frontend: *"Score baseado em X/7 indicadores reais. Indicadores ausentes usam valor estimado neutro."*
+- Exibir o `available_indicators` de forma proeminente em cada análise
+- Reforçar o disclaimer: *"Esta análise é educacional e não deve ser usada como base para decisões de investimento"*
+- **Não requer mudanças no backend**
+
+#### Opção B — Melhorar cobertura com fontes alternativas (esforço médio)
+
+- Integrar **API da CVM** (dados oficiais de DRE e balanço) para calcular Dívida/EBITDA real
+- Usar **dados do Banco Central** para indicadores macroeconômicos setoriais
+- Calcular P/VP de FIIs via `current_price / book_value_per_share` quando disponível
+- **Estimativa:** +2 a 4 semanas de desenvolvimento
+
+#### Opção C — Integrar fonte paga (maior esforço, maior qualidade)
+
+- APIs como **Economatica**, **Refinitiv** ou **Bloomberg** fornecem dados completos
+- Cobertura próxima de 100% para todos os indicadores
+- **Estimativa:** custo mensal + 1 a 2 semanas de integração
+
+---
+
+### 10.6 Recomendação para Discussão do Time
+
+> **Pergunta central:** O FundamentAI deve ser posicionado como ferramenta analítica ou educacional?
+
+**Argumentos para educacional:**
+- As fontes gratuitas disponíveis (fundamentus + yfinance) têm limitações estruturais que não são contornáveis sem custo
+- O projeto já tem valor educacional significativo: explica indicadores, mostra como calcular scores, demonstra o fluxo completo de dados
+- Manter o escopo educacional é honesto com o usuário e evita responsabilidade por decisões financeiras baseadas em dados incompletos
+
+**Argumentos para analítico (com melhorias):**
+- A Opção B (API da CVM) é viável e gratuita — os dados de DRE e balanço são públicos
+- FIIs têm cobertura razoável (DY 80%, CAGR 90%) e poderiam ser o foco inicial
+- Um subconjunto de ~200 ações com boa cobertura poderia ser o escopo analítico inicial
+
+**Sugestão:** definir o posicionamento antes de iniciar o frontend, pois impacta diretamente como os scores e avisos serão apresentados ao usuário.
+
+---
+
+> *Análise elaborada com base nos dados do banco em 2026-05-17. Para atualizar os números: `python -m backend.scripts.generate_report`*
