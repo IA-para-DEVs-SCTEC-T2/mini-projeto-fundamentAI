@@ -30,8 +30,7 @@ Versão: 1.0.0
 import os
 import sys
 import subprocess
-from datetime import datetime
-import pytz
+from datetime import datetime, timezone, timedelta
 
 
 def get_git_branch():
@@ -108,26 +107,19 @@ def get_git_user():
 
 def get_brasilia_timestamp():
     """
-    Retorna timestamp formatado no horário de Brasília (America/Sao_Paulo).
-    
+    Retorna timestamp formatado no horário de Brasília (UTC-3).
+
+    Usa apenas stdlib (datetime + timezone) — sem dependência de pytz.
+    Brasília é UTC-3 fixo (sem horário de verão desde 2019).
+
     Returns:
-        str: Timestamp no formato 'YYYY-MM-DD HH:MM:SS' ou timestamp UTC em caso de erro.
-    
-    Tratamento de erros:
-        - Se pytz não estiver disponível: usa UTC como fallback
-        - Se timezone de Brasília não for encontrado: usa UTC como fallback
-        - Se houver qualquer outro erro: usa UTC como fallback
-    
-    Nota:
-        O timezone America/Sao_Paulo considera automaticamente horário de verão
-        quando aplicável.
+        str: Timestamp no formato 'YYYY-MM-DD HH:MM:SS'.
     """
     try:
-        tz = pytz.timezone('America/Sao_Paulo')
-        now = datetime.now(tz)
+        tz_brasilia = timezone(timedelta(hours=-3))
+        now = datetime.now(tz_brasilia)
         return now.strftime('%Y-%m-%d %H:%M:%S')
     except Exception:
-        # Fallback para UTC se houver qualquer problema com pytz
         now = datetime.utcnow()
         return now.strftime('%Y-%m-%d %H:%M:%S') + ' (UTC)'
 
