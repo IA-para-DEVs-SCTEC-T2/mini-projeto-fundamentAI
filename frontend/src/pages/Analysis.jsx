@@ -7,55 +7,18 @@ import {
 } from 'recharts';
 import { getTickerData, getAnalysis } from '../services/api';
 import LoadingScreen from '../components/LoadingScreen';
+import ErrorScreen from '../components/ErrorScreen';
 import IndicatorTable from '../components/IndicatorTable';
 import Verdict from '../components/Verdict';
 import Chart from '../components/Chart';
 import '../analysis.css';
 
-// ── Descrições dos ativos para o modal "Saiba mais" ──────────────────────────
-const ASSET_INFO = {
-  // Ações
-  PETR4: { name: 'Petrobras PN N2', type: 'Ação', sector: 'Petróleo, Gás e Biocombustíveis', desc: 'A Petrobras é a maior empresa da América Latina por valor de mercado e uma das maiores produtoras de petróleo do mundo. Atua na exploração, produção, refino e distribuição de petróleo e gás. É controlada pelo governo federal brasileiro e opera principalmente no pré-sal, com reservas de classe mundial. Distribui dividendos expressivos e é referência em governança corporativa no setor de energia.', highlight: 'Maior produtora de petróleo do Brasil, com forte geração de caixa e dividendos históricos.' },
-  PETR3: { name: 'Petrobras ON N2', type: 'Ação', sector: 'Petróleo, Gás e Biocombustíveis', desc: 'Ação ordinária da Petrobras, com direito a voto nas assembleias. Mesmos fundamentos da PETR4, porém com menor liquidez. Indicada para investidores que desejam participação nas decisões estratégicas da companhia.', highlight: 'Mesmos fundamentos da PETR4 com direito a voto.' },
-  VALE3: { name: 'Vale S.A.', type: 'Ação', sector: 'Mineração', desc: 'A Vale é uma das maiores mineradoras do mundo, líder global na produção de minério de ferro e níquel. Opera em mais de 30 países e é fundamental para a cadeia siderúrgica global. Seus resultados são fortemente influenciados pelo preço das commodities e pela demanda chinesa. Possui histórico de dividendos robustos e é uma das ações mais negociadas da B3.', highlight: 'Líder mundial em minério de ferro, com forte exposição ao crescimento chinês.' },
-  ITUB4: { name: 'Itaú Unibanco PN', type: 'Ação', sector: 'Bancos', desc: 'O Itaú Unibanco é o maior banco privado da América Latina por ativos totais. Atua em varejo, atacado, seguros e gestão de patrimônio. Reconhecido pela eficiência operacional e consistência nos resultados, mantém ROE acima de 20% ao ano. É referência em inovação digital no setor bancário brasileiro.', highlight: 'Maior banco privado da América Latina, com ROE consistentemente acima de 20%.' },
-  ITUB3: { name: 'Itaú Unibanco ON', type: 'Ação', sector: 'Bancos', desc: 'Ação ordinária do Itaú Unibanco com direito a voto. Mesmos fundamentos sólidos da ITUB4, com menor liquidez no mercado secundário.', highlight: 'Mesmos fundamentos do Itaú com direito a voto.' },
-  BBAS3: { name: 'Banco do Brasil', type: 'Ação', sector: 'Bancos', desc: 'O Banco do Brasil é o maior banco público do país e um dos maiores da América Latina. Tem forte presença no agronegócio, segmento em que é líder absoluto. Combina solidez de banco público com eficiência crescente. Historicamente distribui dividendos generosos e negocia com múltiplos descontados em relação aos pares privados.', highlight: 'Líder no agronegócio brasileiro, com dividendos generosos e múltiplos atrativos.' },
-  BBDC4: { name: 'Bradesco PN', type: 'Ação', sector: 'Bancos', desc: 'O Bradesco é um dos maiores bancos privados do Brasil, com forte presença em seguros e previdência. Passa por processo de transformação digital e reestruturação operacional. Historicamente reconhecido pela capilaridade e pela base diversificada de clientes.', highlight: 'Um dos maiores bancos privados do Brasil, em processo de transformação digital.' },
-  WEGE3: { name: 'WEG S.A.', type: 'Ação', sector: 'Indústria', desc: 'A WEG é uma das maiores fabricantes de equipamentos elétricos do mundo, com presença em mais de 135 países. Produz motores, geradores, transformadores e soluções de automação industrial. É considerada uma das melhores empresas da B3 por sua consistência de crescimento, margens elevadas e gestão exemplar. Referência em qualidade e inovação no setor industrial.', highlight: 'Uma das melhores empresas da B3, com crescimento consistente e presença global.' },
-  EMBR3: { name: 'Embraer S.A.', type: 'Ação', sector: 'Aeronáutica', desc: 'A Embraer é a terceira maior fabricante de aviões comerciais do mundo, especializada em jatos regionais. Atua também em aviação executiva e defesa. Após superar a crise da pandemia, retomou crescimento com forte carteira de pedidos. É uma das poucas empresas brasileiras com presença global relevante em tecnologia de ponta.', highlight: '3ª maior fabricante de aviões do mundo, com forte recuperação pós-pandemia.' },
-  RADL3: { name: 'Raia Drogasil', type: 'Ação', sector: 'Saúde', desc: 'A Raia Drogasil é a maior rede de farmácias do Brasil, com mais de 3.000 lojas. Combina crescimento orgânico acelerado com margens sólidas e gestão eficiente. O setor farmacêutico é considerado defensivo, com demanda resiliente em qualquer ciclo econômico. A empresa investe fortemente em digitalização e serviços de saúde.', highlight: 'Maior rede de farmácias do Brasil, com crescimento acelerado e setor defensivo.' },
-  EGIE3: { name: 'Engie Brasil', type: 'Ação', sector: 'Energia', desc: 'A Engie Brasil é uma das maiores geradoras de energia elétrica do país, com foco em fontes renováveis (hidrelétricas, eólicas e solares). Subsidiária do grupo francês Engie, combina solidez financeira com previsibilidade de receitas por contratos de longo prazo. É reconhecida pelos dividendos consistentes e pela gestão conservadora.', highlight: 'Líder em energia renovável no Brasil, com dividendos consistentes e contratos de longo prazo.' },
-  VIVT3: { name: 'Telefônica Vivo', type: 'Ação', sector: 'Telecom', desc: 'A Telefônica Vivo é a maior operadora de telecomunicações do Brasil, com liderança em telefonia móvel, fibra óptica e serviços digitais. Subsidiária do grupo espanhol Telefónica, distribui dividendos elevados e tem receitas previsíveis. Investe fortemente na expansão da rede 5G e em serviços B2B.', highlight: 'Maior operadora de telecom do Brasil, com dividendos elevados e expansão 5G.' },
-  PRIO3: { name: 'PetroRio S.A.', type: 'Ação', sector: 'Petróleo', desc: 'A PetroRio é uma empresa independente de exploração e produção de petróleo, focada na revitalização de campos maduros offshore. Cresceu rapidamente por aquisições estratégicas e é reconhecida pela eficiência operacional e baixo custo de extração. É uma das empresas de maior crescimento na B3 nos últimos anos.', highlight: 'Empresa de petróleo independente com crescimento acelerado e baixo custo de extração.' },
-  // FIIs
-  HGLG11: { name: 'CSHG Logística', type: 'FII', sector: 'Logística', desc: 'O CSHG Logística é um dos maiores FIIs de logística do Brasil, gerido pelo Credit Suisse Hedging-Griffo. Investe em galpões logísticos de alto padrão, com inquilinos de grande porte como Amazon, DHL e Magazine Luiza. Possui contratos longos e baixa vacância, garantindo distribuição de rendimentos estável e crescente.', highlight: 'Um dos maiores FIIs de logística do Brasil, com inquilinos de alto padrão e baixa vacância.' },
-  XPML11: { name: 'XP Malls', type: 'FII', sector: 'Shopping', desc: 'O XP Malls é um FII de shoppings centers gerido pela XP Asset. Possui participação em shoppings de alto padrão em grandes centros urbanos. Os rendimentos são variáveis conforme o desempenho do varejo, mas a gestão ativa e a qualidade dos ativos garantem consistência nos dividendos.', highlight: 'FII de shoppings premium com gestão ativa da XP Asset.' },
-  MXRF11: { name: 'Maxi Renda', type: 'FII', sector: 'Papel', desc: 'O Maxi Renda é um FII de papel (CRI) gerido pela XP Asset, um dos mais populares do Brasil pela liquidez e pelo dividend yield elevado. Investe em Certificados de Recebíveis Imobiliários (CRI), com rendimentos atrelados ao CDI ou IPCA. É indicado para investidores que buscam renda mensal com menor volatilidade.', highlight: 'Um dos FIIs mais populares do Brasil, com alto DY e rendimentos atrelados ao CDI/IPCA.' },
-  KNRI11: { name: 'Kinea Renda Imobiliária', type: 'FII', sector: 'Híbrido', desc: 'O Kinea Renda Imobiliária é um FII híbrido gerido pela Kinea (Itaú), com portfólio diversificado entre galpões logísticos e lajes corporativas. É um dos maiores FIIs do Brasil por patrimônio líquido e reconhecido pela gestão profissional e pela consistência nos rendimentos.', highlight: 'Um dos maiores FIIs do Brasil, com portfólio diversificado e gestão Kinea/Itaú.' },
-  GGRC11: { name: 'GGR Covepi Renda', type: 'FII', sector: 'Logística', desc: 'O GGR Covepi Renda é um FII de logística com foco em galpões built-to-suit (construídos sob medida para o inquilino). Possui contratos atípicos de longo prazo, o que garante previsibilidade de receita e baixo risco de vacância. É indicado para investidores que buscam estabilidade nos rendimentos.', highlight: 'FII de logística com contratos atípicos de longo prazo e alta previsibilidade de renda.' },
-  VISC11: { name: 'Vinci Shopping Centers', type: 'FII', sector: 'Shopping', desc: 'O Vinci Shopping Centers é um FII de shoppings gerido pela Vinci Partners. Possui participação em shoppings regionais e super-regionais em diversas cidades brasileiras. A gestão ativa busca otimizar o mix de lojas e aumentar o ABL (Área Bruta Locável) dos ativos.', highlight: 'FII de shoppings com gestão ativa da Vinci Partners e portfólio diversificado geograficamente.' },
-  KNCR11: { name: 'Kinea Rendimentos', type: 'FII', sector: 'Papel', desc: 'O Kinea Rendimentos é um FII de papel gerido pela Kinea (Itaú), com foco em CRIs de alta qualidade. Os rendimentos são atrelados ao CDI, tornando-o atrativo em cenários de juros elevados. É um dos FIIs de papel mais sólidos do mercado pela qualidade da gestão e dos ativos.', highlight: 'FII de papel premium com rendimentos atrelados ao CDI e gestão Kinea/Itaú.' },
-  XPLG11: { name: 'XP Log', type: 'FII', sector: 'Logística', desc: 'O XP Log é um FII de logística gerido pela XP Asset, com portfólio de galpões de alto padrão em localizações estratégicas. Possui inquilinos de grande porte e contratos de médio e longo prazo. É um dos FIIs de logística mais líquidos da B3.', highlight: 'FII de logística com alta liquidez, gerido pela XP Asset.' },
-  BTLG11: { name: 'BTG Pactual Logística', type: 'FII', sector: 'Logística', desc: 'O BTG Pactual Logística é um FII de galpões logísticos gerido pelo BTG Pactual, um dos maiores bancos de investimento da América Latina. Possui portfólio de ativos de alto padrão com inquilinos sólidos. A gestão do BTG garante acesso a oportunidades exclusivas de aquisição.', highlight: 'FII de logística com a solidez e o acesso a negócios do BTG Pactual.' },
-};
-
-// Descrição genérica para tickers não mapeados
-function getAssetInfo(ticker, name, sector, assetType) {
-  if (ASSET_INFO[ticker]) return ASSET_INFO[ticker];
-  const isFii = ticker && ticker.endsWith('11');
-  return {
-    name: name || ticker,
-    type: assetType === 'fii' || isFii ? 'FII' : 'Ação',
-    sector: sector || (isFii ? 'Fundos Imobiliários' : 'B3'),
-    desc: `${name || ticker} é um ativo listado na B3 no setor de ${sector || (isFii ? 'Fundos Imobiliários' : 'mercado financeiro')}. O Score Fundamentalista consolida os principais indicadores financeiros em uma nota de 0 a 100, ponderando eficiência, lucratividade, endividamento e geração de renda. Consulte os indicadores detalhados nas abas abaixo para uma análise completa.`,
-    highlight: `Ativo listado na B3 — consulte os indicadores para análise completa.`,
-  };
-}
-
-// ── Score Modal ───────────────────────────────────────────────────────────────
-function ScoreModal({ info, score, onClose }) {
-  if (!info) return null;
+// ── Score Modal — usa apenas dados vindos do backend ─────────────────────────
+function ScoreModal({ ticker, name, sector, assetType, score, onClose }) {
+  const isFii = assetType === 'fii';
+  const typeLabel = isFii ? 'FII' : 'Ação';
+  const sectorLabel = sector || (isFii ? 'Fundos Imobiliários' : 'B3');
+  const displayName = name || ticker;
 
   function scoreColor(s) {
     if (s >= 75) return '#00C853';
@@ -77,8 +40,8 @@ function ScoreModal({ info, score, onClose }) {
         {/* Header */}
         <div className="score-modal-header">
           <div>
-            <div className="score-modal-type-badge">{info.type} · {info.sector}</div>
-            <h2 className="score-modal-title">{info.name}</h2>
+            <div className="score-modal-type-badge">{typeLabel} · {sectorLabel}</div>
+            <h2 className="score-modal-title">{displayName}</h2>
           </div>
           <button className="score-modal-close" onClick={onClose} aria-label="Fechar">
             <X size={18} />
@@ -91,14 +54,7 @@ function ScoreModal({ info, score, onClose }) {
             <span className="score-modal-score-num">{Math.round(score)}</span>
             <span className="score-modal-score-lbl">{scoreLabel(score)}</span>
           </div>
-          <div className="score-modal-highlight">
-            <div className="score-modal-highlight-label">✦ Destaque</div>
-            <div className="score-modal-highlight-text">{info.highlight}</div>
-          </div>
         </div>
-
-        {/* Descrição */}
-        <div className="score-modal-desc">{info.desc}</div>
 
         {/* Score explanation */}
         <div className="score-modal-explanation">
@@ -127,65 +83,6 @@ function ScoreModal({ info, score, onClose }) {
     </div>
   );
 }
-
-function generateMockPriceHistory() {
-  const history = [];
-  const now = new Date();
-  let price = 32;
-  for (let i = 365; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    price = Math.max(10, price + (Math.random() - 0.48) * 0.8);
-    history.push({
-      date: d.toISOString().slice(0, 10),
-      close: parseFloat(price.toFixed(2)),
-    });
-  }
-  return history;
-}
-
-const MOCK_DATA = {
-  ticker: 'PETR4',
-  name: 'Petrobras PN N2',
-  sector: 'Petróleo, Gás e Biocombustíveis',
-  segment: 'Exploração, Refino e Distribuição',
-  asset_type: 'stock',
-  quote: {
-    current_price: 37.42,
-    change_percent: 6.69,
-    previous_close: 35.07,
-    volume: 31200000,
-    market_cap: 482700000000,
-    week_52_low: 28.15,
-    week_52_high: 44.90,
-  },
-  indicators: {
-    pe_ratio: 6.72,
-    roe: 0.184,
-    net_margin: 0.217,
-    dividend_yield: 0.121,
-    ev_ebitda: 4.12,
-    debt_ebitda: 0.68,
-    pb_ratio: 0.9,
-  },
-  price_history: generateMockPriceHistory(),
-};
-
-const MOCK_ANALYSIS = {
-  score: 85,
-  verdict: 'Momento Favorável',
-  conclusion:
-    'Petrobras apresenta fundamentos sólidos com ROE acima da média setorial, dividend yield atrativo e baixo endividamento relativo ao EBITDA.',
-  positive_points: [
-    'ROE acima da média setorial',
-    'Dividend Yield atrativo',
-    'Baixo endividamento',
-  ],
-  negative_points: ['Sensível ao preço do petróleo', 'Risco político'],
-  moment_suggestion:
-    'Momento favorável para análise de entrada a longo prazo.',
-  risk_assessment: 'Médio',
-};
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -441,6 +338,7 @@ export default function Analysis({ ticker, onSearch }) {
   const [loading, setLoading]       = useState(false);
   const [tickerData, setTickerData] = useState(null);
   const [analysisData, setAnalysis] = useState(null);
+  const [error, setError]           = useState(null);
   const [activeTab, setActiveTab]   = useState('overview');
   const [period, setPeriod]         = useState('1A');
   const [showScoreModal, setShowScoreModal] = useState(false);
@@ -449,6 +347,7 @@ export default function Analysis({ ticker, onSearch }) {
     setLoading(true);
     setTickerData(null);
     setAnalysis(null);
+    setError(null);
     try {
       const [td, ad] = await Promise.all([
         getTickerData(symbol),
@@ -456,19 +355,8 @@ export default function Analysis({ ticker, onSearch }) {
       ]);
       setTickerData(td);
       setAnalysis(ad);
-    } catch {
-      // Backend unavailable — use mock data with correct ticker info
-      const isFii = symbol.endsWith('11');
-      const knownInfo = ASSET_INFO[symbol];
-      setTickerData({
-        ...MOCK_DATA,
-        ticker: symbol,
-        name: knownInfo?.name || null,
-        sector: knownInfo?.sector || null,
-        segment: null,
-        asset_type: isFii ? 'fii' : 'stock',
-      });
-      setAnalysis(MOCK_ANALYSIS);
+    } catch (err) {
+      setError(err);
     } finally {
       setLoading(false);
     }
@@ -487,6 +375,14 @@ export default function Analysis({ ticker, onSearch }) {
   );
 
   if (loading) return <LoadingScreen ticker={ticker} />;
+  if (error) return (
+    <ErrorScreen
+      error={error}
+      ticker={ticker}
+      onRetry={() => fetchData(ticker)}
+      onHome={() => onSearch(null)}
+    />
+  );
   if (!tickerData || !analysisData) return null;
 
   const { quote, indicators, asset_type, name, sector, segment } = tickerData;
@@ -494,6 +390,9 @@ export default function Analysis({ ticker, onSearch }) {
   const price   = quote?.current_price;
   const change  = quote?.change_percent;
   const isUp    = (change ?? 0) >= 0;
+
+  // Use score from ticker endpoint (calculated from indicators), fallback to analysis score
+  const displayScore = tickerData.score?.score ?? analysisData.score ?? 0;
 
   // Logo initials
   const logoText = (tickerData.ticker || ticker || '').slice(0, 2).toUpperCase();
@@ -509,10 +408,10 @@ export default function Analysis({ ticker, onSearch }) {
   ];
 
   const fiiCards = [
-    { title: 'P/VP',      value: fmtNum(indicators?.pb_ratio),                        desc: 'Preço / Valor Patrimonial', raw: indicators?.pb_ratio },
-    { title: 'P/L',       value: fmtNum(indicators?.pe_ratio),                        desc: 'Preço / Lucro',             raw: indicators?.pe_ratio },
-    { title: 'DY',        value: fmtNum((indicators?.dividend_yield ?? 0) * 100) + '%', desc: 'Dividend Yield',          raw: indicators?.dividend_yield },
-    { title: 'Cresc. DY', value: fmtNum((indicators?.div_growth ?? 0) * 100) + '%',   desc: 'Crescimento Dividendos',    raw: indicators?.div_growth },
+    { title: 'P/VP',      value: fmtNum(indicators?.pb_ratio),                                    desc: 'Preço / Valor Patrimonial', raw: indicators?.pb_ratio },
+    { title: 'P/L',       value: fmtNum(indicators?.pe_ratio),                                    desc: 'Preço / Lucro',             raw: indicators?.pe_ratio },
+    { title: 'DY',        value: fmtNum((indicators?.dividend_yield ?? 0) * 100) + '%',           desc: 'Dividend Yield',            raw: indicators?.dividend_yield },
+    { title: 'Cresc. DY', value: fmtNum((indicators?.dividend_growth_yoy ?? 0) * 100) + '%',     desc: 'Crescimento Dividendos',    raw: indicators?.dividend_growth_yoy },
   ];
 
   const indCards = isStock ? stockCards : fiiCards;
@@ -563,7 +462,7 @@ export default function Analysis({ ticker, onSearch }) {
 
         {/* Center */}
         <div className="asset-score-center">
-          <ScoreGauge score={analysisData.score} />
+          <ScoreGauge score={displayScore} />
           <div className="score-gauge-label">
             <Info size={12} />
             Score Fundamentalista
@@ -790,7 +689,7 @@ export default function Analysis({ ticker, onSearch }) {
       {showScoreModal && (
         <ScoreModal
           info={getAssetInfo(tickerData.ticker || ticker, name, sector, asset_type)}
-          score={analysisData.score}
+          score={displayScore}
           onClose={() => setShowScoreModal(false)}
         />
       )}
