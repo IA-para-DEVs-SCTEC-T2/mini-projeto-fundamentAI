@@ -1,0 +1,57 @@
+﻿symbol,name,sector,b3_type,reason,last_price
+EGGY3,GRANJA FARIA ON,Agropecuária,ON,sem_preco,0.0
+ODER3,CONSERVAS ODERICH SA ON,Alimentos Processados,ON,sem_preco,0.0
+CCTY3,RDVC CITY ON NM,Construção Civil,ON NM,sem_preco,0.0
+INHA3,GAFISA ON,Construção Civil,ON,sem_preco,0.0
+ESTC4,YDUQS PART PN N2,Diversos,PN N2,sem_preco,0.0
+SEBB3,SEB - SISTEMA EDUCACIONAL BRASILEIRO S/A ON N2,Diversos,ON N2,sem_preco,0.0
+SEBB4,SEB - SISTEMA EDUCACIONAL BRASILEIRO S/A PN N2,Diversos,PN N2,sem_preco,0.0
+CLSC6,CELESC PNB N2,Energia Elétrica,PNB N2,sem_preco,0.0
+EQMA5B,CEMAR PNA MB,Energia Elétrica,PNA MB,sem_preco,0.0
+EQMA6B,CEMAR PNB MB,Energia Elétrica,PNB MB,sem_preco,0.0
+IVTT3,BHG ON NM,Exploração de Imóveis,ON NM,sem_preco,0.0
+ABCB3,ABC Brasil ON N2,Intermediários Financeiros,ON N2,sem_preco,0.0
+BPNM3,BANCO PAN ON N1,Intermediários Financeiros,ON N1,sem_preco,0.0
+CZRS3,Cruzeiro Sul ON N1,Intermediários Financeiros,ON N1,sem_preco,0.0
+DAYC3,Daycoval ON N1,Intermediários Financeiros,ON N1,sem_preco,0.0
+PRBC3,Parana ON N1,Intermediários Financeiros,ON N1,sem_preco,0.0
+SFSA3,Sofisa ON N1,Intermediários Financeiros,ON N1,sem_preco,0.0
+MLPA3,MELHORAMENTOS PAPEIS ON,Madeira e Papel,ON,sem_preco,0.0
+JBDU3,B TECH EQI ON,Outros,ON,sem_preco,0.0
+VNET3,CIELO ON NM,Serviços Financeiros Diversos,ON NM,sem_preco,0.0
+VSPT3,FERROVIA CENTRO-ATLÂNTICA S.A. ON,Transporte,ON,sem_preco,0.0
+VSPT4,FERROVIA CENTRO-ATLÂNTICA S.A. PN,Transporte,PN,sem_preco,0.0
+AEDU11,,,,sem_dados,
+ALLL11,,,,sem_dados,
+ARPS4,DOUAT CIA TEXTIL PN,,PN,sem_preco,0.0
+BAHI11,,,,sem_dados,
+BBTG11,,,,sem_dados,
+BBTG13,BTG PACTUAL DR3 A,,DR3 A,sem_preco,0.0
+BIDI11,,,,sem_dados,
+BMGB11,,,,sem_dados,
+CLAN3,CLARION ON,,ON,sem_preco,0.0
+CPLE11,,,,sem_dados,
+DUFB11,,,,sem_dados,
+ESTC11,,,,sem_dados,
+GALO3,EMEEGE ESCAPAMENTOS ON,,ON,sem_preco,0.0
+ICPI3,CIMENTO ITAU CORUMBA ON,,ON,sem_preco,0.0
+IDVL11,,,,sem_dados,
+KROT11,,,,sem_dados,
+LATM11,,,,sem_dados,
+LECO3,LECO ON,,ON,sem_preco,0.0
+MODL11,,,,sem_dados,
+PALF11,,,,sem_dados,
+PMET3,PRO METALURG ON,,ON,sem_preco,0.0
+RNEW11,,,,sem_dados,
+SEBB11,,,,sem_dados,
+STBP11,,,,sem_dados,
+SULA11,,,,sem_dados,
+TARP11,,,,sem_dados,
+TEFC11,,,,sem_dados,
+TIET11,,,,sem_dados,
+TMGC11,,,,sem_dados,
+UBBR11,,,,sem_dados,
+VGOR3,VIGOR ON,,ON,sem_preco,0.0
+VVAR11,,,,sem_dados,
+VVAX3,VIVAX SA ON,,ON,sem_preco,0.0
+VVAX4,VIVAX SA PN,,PN,sem_preco,0.0

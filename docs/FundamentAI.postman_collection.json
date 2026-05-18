@@ -1,0 +1,669 @@
+{
+  "info": {
+    "name": "FundamentAI API",
+    "description": "Coleção de testes de integração para a API do FundamentAI.\n\nCobre todos os endpoints disponíveis:\n- Health check\n- GET /api/ticker/{ticker} — ações e FIIs\n- POST /api/analysis/{ticker} — análise via LLM\n\n**Pré-requisito:** backend rodando em http://localhost:8000\n```\nuvicorn backend.api.main:app --reload --host 0.0.0.0 --port 8000\n```",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "fundamentai-api-v1"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string",
+      "description": "URL base da API. Altere para o endereço de produção quando necessário."
+    }
+  ],
+  "item": [
+    {
+      "name": "Health & Root",
+      "description": "Endpoints de status e navegação da API.",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Verifica se a API está operacional. Retorna status e versão."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('status = ok', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.status).to.eql('ok');",
+                  "    pm.expect(body).to.have.property('version');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"status\": \"ok\",\n  \"version\": \"0.1.0\",\n  \"service\": \"FundamentAI API\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Root",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/",
+              "host": ["{{base_url}}"],
+              "path": [""]
+            },
+            "description": "Endpoint raiz — retorna links de navegação."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Tem link para docs', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('docs');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Swagger UI (docs)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/docs",
+              "host": ["{{base_url}}"],
+              "path": ["docs"]
+            },
+            "description": "Documentação interativa Swagger UI."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Docs disponíveis (200)', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ticker — Ações",
+      "description": "Consulta de dados fundamentalistas de ações da B3.\n\nFonte: fundamentus (indicadores) + yfinance (cotação e histórico).",
+      "item": [
+        {
+          "name": "GET Ação — PETR4 (Petrobras)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/ticker/PETR4",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ticker", "PETR4"]
+            },
+            "description": "Consulta dados fundamentalistas da Petrobras (PETR4).\n\nEspera:\n- asset_type = stock\n- score entre 0 e 100\n- indicadores de ação (roe, pe_ratio, net_margin, etc.)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test('Estrutura da resposta', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('ticker');",
+                  "    pm.expect(body).to.have.property('asset_type');",
+                  "    pm.expect(body).to.have.property('quote');",
+                  "    pm.expect(body).to.have.property('indicators');",
+                  "    pm.expect(body).to.have.property('score');",
+                  "});",
+                  "",
+                  "pm.test('asset_type = stock', () => {",
+                  "    pm.expect(pm.response.json().asset_type).to.eql('stock');",
+                  "});",
+                  "",
+                  "pm.test('Score entre 0 e 100', () => {",
+                  "    const score = pm.response.json().score.score;",
+                  "    pm.expect(score).to.be.within(0, 100);",
+                  "});",
+                  "",
+                  "pm.test('Score tem label válido', () => {",
+                  "    const label = pm.response.json().score.label;",
+                  "    pm.expect(['Excelente', 'Bom', 'Regular', 'Fraco']).to.include(label);",
+                  "});",
+                  "",
+                  "// Salva ticker para uso em outros testes",
+                  "pm.collectionVariables.set('last_stock_ticker', pm.response.json().ticker);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Ação — VALE3 (Vale)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/ticker/VALE3",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ticker", "VALE3"]
+            },
+            "description": "Consulta dados fundamentalistas da Vale (VALE3)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('asset_type = stock', () => {",
+                  "    pm.expect(pm.response.json().asset_type).to.eql('stock');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Ação — WEGE3 (WEG)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/ticker/WEGE3",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ticker", "WEGE3"]
+            },
+            "description": "Consulta dados fundamentalistas da WEG (WEGE3) — empresa de alta qualidade, score esperado alto."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('asset_type = stock', () => {",
+                  "    pm.expect(pm.response.json().asset_type).to.eql('stock');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Ação — minúsculo (normalização)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/ticker/petr4",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ticker", "petr4"]
+            },
+            "description": "Testa normalização de ticker em minúsculo. Deve retornar os mesmos dados que PETR4."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 (normalização funciona)', () => pm.response.to.have.status(200));",
+                  "pm.test('Ticker normalizado para maiúsculo', () => {",
+                  "    pm.expect(pm.response.json().ticker).to.eql('PETR4');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ticker — FIIs",
+      "description": "Consulta de dados fundamentalistas de FIIs.\n\nFonte exclusiva: yfinance (fundamentus não suporta FIIs).",
+      "item": [
+        {
+          "name": "GET FII — HGLG11 (CSHG Logística)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/ticker/HGLG11",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ticker", "HGLG11"]
+            },
+            "description": "Consulta dados do FII HGLG11.\n\nEspera:\n- asset_type = fii\n- indicadores de FII (pb_ratio, dividend_yield, dividend_growth_yoy)\n- score calculado com pesos de FII"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test('asset_type = fii', () => {",
+                  "    pm.expect(pm.response.json().asset_type).to.eql('fii');",
+                  "});",
+                  "",
+                  "pm.test('Score entre 0 e 100', () => {",
+                  "    const score = pm.response.json().score.score;",
+                  "    pm.expect(score).to.be.within(0, 100);",
+                  "});",
+                  "",
+                  "pm.test('Score tem label válido', () => {",
+                  "    const label = pm.response.json().score.label;",
+                  "    pm.expect(['Excelente', 'Bom', 'Regular', 'Fraco']).to.include(label);",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set('last_fii_ticker', pm.response.json().ticker);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET FII — XPML11 (XP Malls)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/ticker/XPML11",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ticker", "XPML11"]
+            },
+            "description": "Consulta dados do FII XPML11 (shopping centers)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('asset_type = fii', () => {",
+                  "    pm.expect(pm.response.json().asset_type).to.eql('fii');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET FII — MXRF11 (Maxi Renda)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/ticker/MXRF11",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ticker", "MXRF11"]
+            },
+            "description": "Consulta dados do FII MXRF11 (papel/recebíveis)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('asset_type = fii', () => {",
+                  "    pm.expect(pm.response.json().asset_type).to.eql('fii');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ticker — Erros e Validações",
+      "description": "Testa comportamento da API para entradas inválidas e casos de erro.",
+      "item": [
+        {
+          "name": "GET Ticker — formato inválido (400)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/ticker/INVALIDO123",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ticker", "INVALIDO123"]
+            },
+            "description": "Ticker com formato inválido (mais de 7 caracteres). Deve retornar 400."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Mensagem de erro presente', () => {",
+                  "    pm.expect(pm.response.json()).to.have.property('detail');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Ticker — apenas letras sem número (400)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/ticker/PETRO",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ticker", "PETRO"]
+            },
+            "description": "Ticker sem número no final. Deve retornar 400."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Ticker — começa com número (400)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/ticker/123ABC",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ticker", "123ABC"]
+            },
+            "description": "Ticker começando com número. Deve retornar 400."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET Ticker — inativo (404)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/ticker/XXXX3",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ticker", "XXXX3"]
+            },
+            "description": "Ticker inexistente ou inativo. Deve retornar 404 com reason = inactive ou not_found."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Detail presente', () => {",
+                  "    pm.expect(pm.response.json()).to.have.property('detail');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Analysis — LLM",
+      "description": "Geração de análises fundamentalistas via Anthropic Claude.\n\n**Nota:** Requer ANTHROPIC_API_KEY configurada no .env.\nSem a chave, a API retorna um mock estruturado (comportamento de fallback).",
+      "item": [
+        {
+          "name": "POST Analysis — PETR4",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/analysis/PETR4",
+              "host": ["{{base_url}}"],
+              "path": ["api", "analysis", "PETR4"]
+            },
+            "description": "Gera análise fundamentalista da Petrobras via LLM.\n\nEspera:\n- verdict: Positivo | Neutro | Negativo\n- score: 0-100\n- disclaimer obrigatório\n- positive_points e negative_points preenchidos"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test('Estrutura da resposta', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('ticker');",
+                  "    pm.expect(body).to.have.property('verdict');",
+                  "    pm.expect(body).to.have.property('score');",
+                  "    pm.expect(body).to.have.property('confidence_level');",
+                  "    pm.expect(body).to.have.property('positive_points');",
+                  "    pm.expect(body).to.have.property('negative_points');",
+                  "    pm.expect(body).to.have.property('conclusion');",
+                  "    pm.expect(body).to.have.property('disclaimer');",
+                  "});",
+                  "",
+                  "pm.test('Disclaimer presente e não vazio', () => {",
+                  "    pm.expect(pm.response.json().disclaimer).to.be.a('string').and.not.empty;",
+                  "});",
+                  "",
+                  "pm.test('Verdict válido', () => {",
+                  "    const verdict = pm.response.json().verdict;",
+                  "    pm.expect(['Positivo', 'Neutro', 'Negativo']).to.include(verdict);",
+                  "});",
+                  "",
+                  "pm.test('Score entre 0 e 100', () => {",
+                  "    const score = pm.response.json().score;",
+                  "    pm.expect(score).to.be.within(0, 100);",
+                  "});",
+                  "",
+                  "pm.test('ticker = PETR4', () => {",
+                  "    pm.expect(pm.response.json().ticker).to.eql('PETR4');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Analysis — HGLG11 (FII)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/analysis/HGLG11",
+              "host": ["{{base_url}}"],
+              "path": ["api", "analysis", "HGLG11"]
+            },
+            "description": "Gera análise fundamentalista do FII HGLG11.\n\nEspera o mesmo formato de resposta que ações (output unificado)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test('Disclaimer presente', () => {",
+                  "    pm.expect(pm.response.json().disclaimer).to.be.a('string').and.not.empty;",
+                  "});",
+                  "",
+                  "pm.test('Verdict válido', () => {",
+                  "    const verdict = pm.response.json().verdict;",
+                  "    pm.expect(['Positivo', 'Neutro', 'Negativo']).to.include(verdict);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Analysis — segunda chamada (cache)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/analysis/PETR4",
+              "host": ["{{base_url}}"],
+              "path": ["api", "analysis", "PETR4"]
+            },
+            "description": "Segunda chamada para o mesmo ticker. Deve retornar cached = true se análise recente existir no banco."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Resposta em cache', () => {",
+                  "    pm.expect(pm.response.json().cached).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST Analysis — ticker inativo (404)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/analysis/XXXX3",
+              "host": ["{{base_url}}"],
+              "path": ["api", "analysis", "XXXX3"]
+            },
+            "description": "Análise de ticker inexistente. Deve retornar 404."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Fluxo Completo (E2E)",
+      "description": "Sequência que simula o fluxo completo do frontend:\n1. Health check\n2. Busca dados do ticker\n3. Solicita análise LLM\n\nExecutar em ordem.",
+      "item": [
+        {
+          "name": "1. Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('API online', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('e2e_ticker', 'WEGE3');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Busca Dados do Ticker",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/ticker/{{e2e_ticker}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ticker", "{{e2e_ticker}}"]
+            },
+            "description": "Usa o ticker definido no passo anterior via variável de coleção."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Dados do ticker retornados', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('e2e_asset_type', body.asset_type);",
+                  "pm.collectionVariables.set('e2e_score', body.score.score);",
+                  "console.log('Ticker:', body.ticker, '| Tipo:', body.asset_type, '| Score:', body.score.score);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Solicita Análise LLM",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/analysis/{{e2e_ticker}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "analysis", "{{e2e_ticker}}"]
+            },
+            "description": "Solicita análise LLM para o ticker do fluxo E2E."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Análise gerada', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Disclaimer presente', () => pm.expect(body.disclaimer).to.not.be.empty);",
+                  "pm.test('Verdict válido', () => {",
+                  "    pm.expect(['Positivo', 'Neutro', 'Negativo']).to.include(body.verdict);",
+                  "});",
+                  "console.log('Verdict:', body.verdict, '| Score:', body.score, '| Cached:', body.cached);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

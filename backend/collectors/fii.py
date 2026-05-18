@@ -76,9 +76,16 @@ def get_fii_data(symbol: str) -> dict:
         shares_outstanding = info.get("sharesOutstanding")
         book_value_per_share = info.get("bookValue")
 
-        # Dividend Yield (yfinance retorna como decimal, ex: 0.0846 = 8.46%)
+        # Dividend Yield
+        # yfinance retorna dividendYield em escala variável:
+        # - Alguns tickers: decimal (0.0938 = 9.38%) → correto
+        # - Outros tickers: percentual (9.38 = 9.38%) → precisa dividir por 100
+        # Regra: se valor > 1.0, está em percentual → divide por 100
         dy_raw = info.get("dividendYield")
-        dividend_yield = dy_raw if dy_raw is not None else None
+        if dy_raw is not None:
+            dividend_yield = dy_raw / 100 if dy_raw > 1.0 else dy_raw
+        else:
+            dividend_yield = None
 
         # Histórico de dividendos
         div_history = _get_dividend_history(stock, symbol)

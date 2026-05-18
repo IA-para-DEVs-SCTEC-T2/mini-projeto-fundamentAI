@@ -6,9 +6,9 @@ Responsabilidades:
 - Detectar tickers inativos antes de coletar dados
 - Gerar relatório de inativos
 
-Regras de classificação:
-- FII: ticker termina em 11 (ex: HGLG11, XPML11, KNRI11)
-- Ação: todos os demais (ON, PN, UNT, etc.)
+Regras de classificação (dois níveis):
+1. Offline (por símbolo): ticker termina em 11 E não está na lista de units
+2. Online (via yfinance): industryKey começa com "reit-" → FII confirmado
 
 Critérios de inatividade:
 - Preço de mercado zero ou ausente
@@ -27,8 +27,49 @@ from backend.db.models import ASSET_TYPE_FII, ASSET_TYPE_STOCK
 
 logger = logging.getLogger(__name__)
 
-# Padrão de ticker FII: 4 letras + 11
+# Padrão de ticker FII: exatamente 4 letras + 11
 _FII_PATTERN = re.compile(r"^[A-Z]{4}11$")
+
+# Units de empresas que terminam em 11 mas NÃO são FIIs.
+# Critério definitivo: industryKey via yfinance NÃO começa com "reit-"
+# Esta lista cobre os casos conhecidos para classificação offline (sem API).
+_NOT_FII_UNITS: frozenset[str] = frozenset({
+    # Energia elétrica
+    "AESB11", "ALUP11", "CEPE11", "CMIG11", "COCE11", "CPFE11",
+    "CPLE11", "EGIE11", "EKTR11", "EMAE11", "ENGI11", "ENMT11",
+    "EQTL11", "ETER11", "EUCA11", "GEPA11", "GGBR11", "LIGT11",
+    "NEOE11", "OMGE11", "SAPR11", "TAEE11", "TIET11", "TRPL11",
+    # Financeiro / Bancos
+    "ABCB11", "BPAC11", "BRBI11", "BRGE11", "BSLI11", "ITSA11",
+    "SANB11", "WIZC11",
+    # Papel e celulose
+    "KLBN11", "SUZB11",
+    # Real Estate empresas (não fundos) — industryKey = real-estate-services
+    "IGTI11", "MEAL11", "PCAR11", "SOMA11", "MULT11", "BRPR11",
+    # Outros setores
+    "AALR11", "ABEV11", "AMAR11", "ATOM11", "BAHI11", "BBTG11",
+    "BIDI11", "BMGB11", "BOAS11", "BPAN11", "BSEV11",
+    "CALI11", "CBAV11", "CGAS11", "CGRA11", "CIEL11", "CLSC11",
+    "CSRN11", "DASA11", "DEXP11", "DOHL11", "DTEX11",
+    "EALT11", "EEEL11", "ELPL11", "EQPA11", "FESA11", "FHER11",
+    "FIGE11", "FRAS11", "GFSA11", "GOAU11", "GPCP11", "GRND11",
+    "HBOR11", "HETA11", "HGTX11", "IDVL11", "INEP11", "JBSS11",
+    "JSLG11", "KEPL11", "LAME11", "LEVE11", "LIQO11", "LLIS11",
+    "LOGN11", "LPSB11", "LREN11", "LUXM11", "MDIA11", "MGEL11",
+    "MGLU11", "MILS11", "MOVI11", "MRFG11", "MRVE11", "MYPK11",
+    "NATU11", "NEMO11", "NORD11", "NTCO11", "NUTR11", "ODPV11",
+    "OFSA11", "OMGE11", "ORVR11", "PATI11", "PDGR11", "PETR11",
+    "PINE11", "PMAM11", "PNVL11", "POMO11", "POSI11", "PRIO11",
+    "PTBL11", "PTNT11", "QUAL11", "RADL11", "RAIL11", "RAPT11",
+    "RCSL11", "RDNI11", "RENT11", "RLOG11", "RNEW11", "ROMI11",
+    "RSID11", "SBSP11", "SCAR11", "SEER11", "SEQL11", "SGPS11",
+    "SHOW11", "SHUL11", "SLCE11", "SMLS11", "SMTO11", "SOND11",
+    "SQIA11", "STBP11", "SULA11", "TASA11", "TCNO11", "TGMA11",
+    "TIMS11", "TPIS11", "TRIS11", "TUPY11", "UCAS11", "UGPA11",
+    "UNIP11", "USIM11", "VALE11", "VBBR11", "VIVA11", "VIVT11",
+    "VLID11", "VULC11", "WEGE11", "WEST11", "WHRL11", "WIZS11",
+    "YDUQ11",
+})
 
 # Razões de inatividade
 REASON_NO_PRICE = "sem_preco"
@@ -38,26 +79,52 @@ REASON_DELISTED = "deslistado"
 
 def classify_asset_type(symbol: str) -> str:
     """
-    Determina o tipo de ativo com base no símbolo.
+    Classificação offline por símbolo (sem chamada de API).
 
-    Args:
-        symbol: Símbolo do ativo (ex: PETR4, HGLG11).
+    Regras:
+    1. Símbolo deve ter exatamente 4 letras + "11"
+    2. Não pode estar na lista _NOT_FII_UNITS (units de empresas conhecidas)
+
+    Para classificação definitiva use is_real_fii_via_yfinance().
 
     Returns:
-        "fii" para Fundos Imobiliários, "stock" para ações.
-
-    Exemplos:
-        >>> classify_asset_type("HGLG11")
-        "fii"
-        >>> classify_asset_type("PETR4")
-        "stock"
-        >>> classify_asset_type("MXRF11")
-        "fii"
+        "fii" (candidato a FII) ou "stock".
     """
     symbol = symbol.upper().strip()
-    if _FII_PATTERN.match(symbol):
+    if _FII_PATTERN.match(symbol) and symbol not in _NOT_FII_UNITS:
         return ASSET_TYPE_FII
     return ASSET_TYPE_STOCK
+
+
+def is_real_fii_via_yfinance(symbol: str) -> bool:
+    """
+    Confirma via yfinance se um ticker é realmente um FII.
+
+    Critério definitivo: industryKey começa com "reit-"
+    Fallback: longName contém "Fundo" e "Imobiliario" (para FIIs sem industryKey)
+
+    Args:
+        symbol: Símbolo do ativo (ex: HGLG11).
+
+    Returns:
+        True se for FII real, False caso contrário.
+    """
+    try:
+        import yfinance as yf
+        ticker_sa = symbol.upper().strip()
+        if not ticker_sa.endswith(".SA"):
+            ticker_sa += ".SA"
+        info = yf.Ticker(ticker_sa).info
+        industry_key = (info.get("industryKey") or "").lower()
+        if industry_key.startswith("reit-"):
+            return True
+        # Fallback: nome contém indicadores de fundo imobiliário
+        long_name = (info.get("longName") or "").lower()
+        if "fundo" in long_name and ("imobili" in long_name or "fii" in long_name):
+            return True
+        return False
+    except Exception:
+        return False
 
 
 def is_inactive(

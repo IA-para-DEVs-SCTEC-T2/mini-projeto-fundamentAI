@@ -17,9 +17,10 @@ Organização de diretórios: backend Python (coleta, processamento, ETL e API) 
 │   │   └── bacen.py             # SELIC e IPCA via API do Banco Central
 │   │
 │   ├── processors/              # Processamento, classificação e scoring
-│   │   ├── asset_classifier.py  # Classifica stock/fii, detecta inativos
+│   │   ├── asset_classifier.py  # Classifica stock/fii (2 níveis), detecta inativos
 │   │   ├── indicators.py        # Cálculo de indicadores por tipo de ativo
-│   │   ├── scoring.py           # Score específico por tipo, output unificado
+│   │   ├── scoring.py           # Score 0-100 com lógica específica por tipo, output unificado
+│   │   ├── data_validator.py    # Validação de ranges por tipo de ativo (compliance)
 │   │   └── comparator.py        # Comparação setorial
 │   │
 │   ├── etl/                     # Orquestração do pipeline diário
@@ -40,7 +41,8 @@ Organização de diretórios: backend Python (coleta, processamento, ETL e API) 
 │   │   └── repository.py        # Repository pattern com CRUD e upsert
 │   │
 │   ├── scripts/                 # Scripts de manutenção e população do banco
-│   │   ├── populate_all_tickers.py   # Popula banco com todos os tickers da B3
+│   │   ├── populate_all_tickers.py   # Popula banco com todos os tickers de ações da B3
+│   │   ├── populate_fiis.py          # Popula banco com os 180 FIIs reais confirmados
 │   │   ├── update_income_growth.py   # Atualiza CAGR de lucro via yfinance
 │   │   ├── ensure_min_indicators.py  # Verifica e enriquece indicadores (≥3 por ticker)
 │   │   ├── data_retention_cleanup.py # Limpeza trimestral conforme política de retenção
@@ -75,6 +77,7 @@ Organização de diretórios: backend Python (coleta, processamento, ETL e API) 
 │   └── package.json
 │
 ├── docs/                        # Documentação do projeto
+│   └── FundamentAI.postman_collection.json  # Coleção Postman para testes de integração
 ├── .kiro/                       # Configurações e steering do Kiro
 │   ├── hooks/                   # Hooks do Kiro (ex: prompt-logger)
 │   ├── scripts/                 # Scripts auxiliares do Kiro
@@ -97,7 +100,7 @@ Cada arquivo é responsável por uma fonte de dados específica ou tipo de ativo
 |---|---|
 | `yfinance.py` | Cotações, histórico de preços e DRE de ações |
 | `fundamentus.py` | Indicadores fundamentalistas de ações (fonte principal) |
-| `fii.py` | Todos os dados de FIIs via yfinance |
+| `fii.py` | Todos os dados de FIIs via yfinance. Normaliza `dividendYield` (divide por 100 se > 1.0) |
 | `income_history.py` | Histórico de DRE para cálculo de CAGR de lucro |
 | `bacen.py` | SELIC e IPCA via API pública do BCB |
 
@@ -107,9 +110,10 @@ Lógica pura de cálculo e scoring. Sem dependência de banco ou API — facilit
 
 | Arquivo | Responsabilidade |
 |---|---|
-| `asset_classifier.py` | Classifica ticker como `stock` ou `fii`; detecta inativos |
-| `indicators.py` | Calcula indicadores por tipo de ativo |
+| `asset_classifier.py` | Classifica ticker como `stock` ou `fii` (2 níveis); detecta inativos |
+| `indicators.py` | Calcula indicadores por tipo de ativo; deriva EBITDA via EV/EV_EBITDA |
 | `scoring.py` | Score 0-100 com lógica específica por tipo, output unificado |
+| `data_validator.py` | Valida ranges de indicadores por tipo; gera relatório de anomalias |
 | `comparator.py` | Comparação setorial de indicadores |
 
 ### `backend/db/models.py`
@@ -130,12 +134,14 @@ Presente em **todas as tabelas de tickers** (`tickers` e `inactive_tickers`):
 
 | Valor | Significado |
 |---|---|
-| `"stock"` | Ação (empresa da B3) |
-| `"fii"` | Fundo de Investimento Imobiliário |
+| `"stock"` | Ação ou unit de empresa da B3 |
+| `"fii"` | Fundo de Investimento Imobiliário real |
 
-A classificação é feita automaticamente pelo módulo `processors/asset_classifier.py` com base no símbolo:
-- Tickers terminados em `11` → `"fii"` (ex: HGLG11, XPML11)
-- Demais → `"stock"` (ex: PETR4, VALE3)
+A classificação é feita em dois níveis pelo módulo `processors/asset_classifier.py`:
+- **Nível 1 (offline):** padrão `^[A-Z]{4}11$` + lista de exclusão `_NOT_FII_UNITS`
+- **Nível 2 (online):** `industryKey` via yfinance começa com `"reit-"` → FII confirmado
+
+> **Importante:** SANB11, TAEE11, ENGI11, KLBN11 e similares são units de empresas — classificados como `"stock"`, não `"fii"`.
 
 #### Coluna `b3_type`
 
@@ -154,14 +160,18 @@ Scripts de manutenção executados manualmente ou via ETL:
 
 | Script | Descrição | Quando executar |
 |---|---|---|
-| `populate_all_tickers.py` | Popula banco com todos os tickers da B3 | Primeira carga ou reprocessamento |
+| `populate_all_tickers.py` | Popula banco com todos os tickers de ações da B3 (~938) | Primeira carga ou reprocessamento |
+| `populate_fiis.py` | Popula banco com os 180 FIIs reais confirmados | Primeira carga ou atualização da lista |
 | `update_income_growth.py` | Atualiza CAGR de lucro via yfinance | Após populate ou mensalmente |
-| `ensure_min_indicators.py` | Verifica e enriquece tickers com < 3 indicadores | **Automático após cada ETL** |
+| `ensure_min_indicators.py` | Verifica e enriquece indicadores (mínimo 3 por ticker) | **Automático após cada ETL** |
 | `fix_zero_indicators.py` | Corrige zeros inválidos do fundamentus | Manutenção pontual |
 
 ```bash
-# Popula banco com todos os tickers da B3 (retoma de onde parou)
+# Popula banco com todos os tickers de ações da B3 (retoma de onde parou)
 python -m backend.scripts.populate_all_tickers
+
+# Popula banco com FIIs reais (lista curada de 180 FIIs)
+python -m backend.scripts.populate_fiis
 
 # Atualiza CAGR de lucro via yfinance para todas as ações
 python -m backend.scripts.update_income_growth
@@ -173,15 +183,43 @@ python -m backend.scripts.ensure_min_indicators
 python -m backend.scripts.ensure_min_indicators --dry-run
 ```
 
-#### Garantia de qualidade — `ensure_min_indicators.py`
+#### `populate_all_tickers.py` — Ações da B3
+
+- Usa `fundamentus.list_papel_all()` para listar todos os tickers
+- Classifica cada ticker via `classify_asset_type()` — tickers `XXXX11` que não estão na lista `_NOT_FII_UNITS` são tratados como candidatos a FII, mas o fundamentus não os suporta, então são ignorados
+- Deriva `debt_ebitda` via `Div_Liquida / (Valor_da_firma / EV_EBITDA)` quando disponível
+- Retoma de onde parou (pula tickers já no banco)
+
+#### `populate_fiis.py` — FIIs Reais
+
+- Lista curada de 180 FIIs confirmados via `industryKey=reit-*` do yfinance
+- Coleta dados via `get_fii_data()` do coletor FII
+- Normaliza `dividend_yield` (divide por 100 se > 1.0)
+- Suporta `--dry-run` e `--limit`
+
+#### `ensure_min_indicators.py` — Garantia de qualidade de dados
 
 Executado automaticamente ao final de cada rodada do ETL (`run_full_pipeline`).
 Garante que todos os tickers ativos tenham pelo menos **3 indicadores disponíveis** para o cálculo do score.
 
-Fluxo por ticker com < 3 indicadores:
-1. Busca em fonte alternativa (yfinance)
-2. Calcula indicadores derivados a partir dos dados já no banco
-3. Se ainda < 3 → move para `inactive_tickers`
+**Fluxo por ticker com < 3 indicadores:**
+1. **Estratégia 1 — yfinance:** ROE, Margem, P/L, P/VP, DY para ações; P/VP, DY calculado do histórico, crescimento de dividendos para FIIs
+2. **Estratégia 2 — cálculo derivado:** ROE = lucro/patrimônio, Margem = lucro/receita, Dívida/EBITDA, P/VP = preço/VPA, DY = dividendos_12m/preço
+3. **Se ainda < 3 após todas as tentativas:** move para `inactive_tickers`
+
+```bash
+# Verificação completa (padrão — move inativos)
+python -m backend.scripts.ensure_min_indicators
+
+# Apenas relatório, sem alterar banco
+python -m backend.scripts.ensure_min_indicators --dry-run
+
+# Ticker específico
+python -m backend.scripts.ensure_min_indicators --ticker PETR4
+
+# Enriquece sem mover para inativos
+python -m backend.scripts.ensure_min_indicators --no-move-inactive
+```
 
 ### `backend/api/routes/ticker.py`
 

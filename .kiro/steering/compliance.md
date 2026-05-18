@@ -69,6 +69,82 @@ Cada dado persistido no banco deve ter rastreabilidade de origem:
 
 ## Qualidade dos Dados — Regras de Validação
 
+### Score Neutro para Indicadores Ausentes — Metodologia Explícita
+
+> ⚠️ **Esta seção documenta uma decisão de design com impacto direto na confiabilidade dos scores. Deve ser comunicada ao usuário final.**
+
+Quando um indicador está **ausente (nulo)** no banco — seja por limitação da fonte, por não ter sido coletado ainda, ou por ter sido removido pela validação de range — o sistema **não descarta o ticker**. Em vez disso, atribui um **score neutro de 50 pontos (em escala 0–100)** para aquele componente no cálculo do score final.
+
+#### Justificativa
+
+- Descartar tickers com dados incompletos eliminaria a maioria dos ativos da B3 (cobertura de P/L é ~30%, EV/EBITDA ~5%)
+- O score neutro representa "sem informação suficiente para penalizar ou premiar"
+- É preferível a um score artificialmente baixo por ausência de dado
+
+#### Impacto por indicador ausente — Ações
+
+| Indicador ausente | Peso no score | Score neutro aplicado | Impacto no score final |
+|---|---|---|---|
+| ROE | 20% | 50 pts | +10 pts (neutro) |
+| Margem Líquida | 15% | 50 pts | +7.5 pts (neutro) |
+| Dívida/EBITDA | 15% | 50 pts | +7.5 pts (neutro) |
+| P/L | 15% | 50 pts | +7.5 pts (neutro) |
+| CAGR Lucro | 15% | 50 pts | +7.5 pts (neutro) |
+| EV/EBITDA | 10% | 50 pts | +5 pts (neutro) |
+| Dividend Yield | 10% | 50 pts | +5 pts (neutro) |
+
+> Um ticker de ação **sem nenhum indicador** recebe score final = **50.0 (Bom)** — inteiramente composto por scores neutros.
+
+#### Impacto por indicador ausente — FIIs
+
+| Indicador ausente | Peso no score | Score neutro aplicado | Impacto no score final |
+|---|---|---|---|
+| Dividend Yield | 35% | 50 pts | +17.5 pts (neutro) |
+| P/VP | 30% | 50 pts | +15 pts (neutro) |
+| CAGR Dividendos | 20% | 50 pts | +10 pts (neutro) |
+| P/L | 15% | 50 pts | +7.5 pts (neutro) |
+
+> Um FII **sem nenhum indicador** recebe score final = **50.0 (Bom)** — inteiramente composto por scores neutros.
+
+#### Cobertura atual do banco (referência: 2026-05-17)
+
+| Tipo | Indicador | Cobertura | Tickers com score neutro nesse componente |
+|---|---|---|---|
+| Ação | ROE | 82.8% | ~161 ações |
+| Ação | Margem Líquida | 54.5% | ~427 ações |
+| Ação | P/L | 30.2% | ~655 ações |
+| Ação | P/VP | 29.6% | ~660 ações |
+| Ação | EV/EBITDA | 5.3% | ~888 ações |
+| Ação | Dívida/EBITDA | 0.0% | **938 ações** (100%) |
+| Ação | CAGR Lucro | 29.5% | ~661 ações |
+| FII | P/VP | 19.4% | ~145 FIIs |
+| FII | P/L | 60.0% | ~72 FIIs |
+| FII | Dividend Yield | 80.0% | ~36 FIIs |
+| FII | CAGR Dividendos | 90.0% | ~18 FIIs |
+
+#### Obrigações de transparência
+
+1. **API:** o campo `available_indicators` no response do score lista quais indicadores foram efetivamente usados (não neutros)
+2. **Frontend:** deve exibir o número de indicadores disponíveis junto ao score (ex: "Score baseado em 4/7 indicadores")
+3. **LLM:** o prompt deve informar ao Claude quais indicadores estão ausentes, para que a análise textual reflita essa limitação
+4. **Relatório:** `backend/reports/relatorio_banco.md` documenta a cobertura atual por indicador
+
+#### Implementação
+
+O score neutro é aplicado em `backend/processors/scoring.py`:
+
+```python
+# Exemplo: _score_pe_ratio retorna 50.0 quando pe_ratio é None
+def _score_pe_ratio(pe_ratio: Optional[float]) -> float:
+    if pe_ratio is None:
+        return 50.0  # score neutro — dado ausente
+    ...
+```
+
+Cada função de score individual (`_score_roe`, `_score_net_margin`, etc.) segue o mesmo padrão: retorna `50.0` quando o valor é `None`.
+
+---
+
 ### Indicadores de ações (ranges esperados)
 
 | Indicador | Range válido | Ação se fora do range |
@@ -115,6 +191,7 @@ Todos os relatórios são gerados em `backend/reports/`:
 | `banco_analise_nulos.csv` | Após cada `populate_all_tickers` | Campos nulos por ticker |
 | `relatorio_inativos.csv` | Após cada `populate_all_tickers` | Tickers inativos com motivo e tipo |
 | `relatorio_anomalias.csv` | Quando anomalias são detectadas | Indicadores fora do range por ticker |
+| `relatorio_banco.md` | Sob demanda via `generate_report.py` | Visão completa: scores, cobertura de indicadores, top/bottom tickers |
 
 > Os CSVs não são versionados no Git (`.gitignore`). A pasta `backend/reports/` é mantida via `.gitkeep`.
 
@@ -139,3 +216,5 @@ Ao trabalhar neste projeto:
 4. **Validar ranges** antes de persistir indicadores no banco
 5. **Registrar a fonte** de cada dado coletado nos logs
 6. **Nunca expor** chaves de API, senhas ou tokens em código ou logs
+7. **Score neutro é intencional** — indicadores nulos recebem 50 pts por design; nunca remover essa lógica sem documentar o impacto
+8. **Transparência obrigatória** — o campo `available_indicators` no response do score deve sempre refletir quais indicadores foram realmente usados (não neutros); o frontend deve exibir essa informação ao usuário

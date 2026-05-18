@@ -9,7 +9,7 @@ Definição das tecnologias utilizadas no projeto. Onde a tecnologia específica
 | Tecnologia | Papel |
 |---|---|
 | **Python** | Linguagem principal do backend |
-| **yfinance** | Cotações, histórico de preços, DRE histórico e dados de FIIs |
+| **yfinance** | Cotações, histórico de preços, DRE histórico, dados de FIIs e enriquecimento de indicadores |
 | **fundamentus** | Indicadores fundamentalistas de ações da B3 (fonte principal para ações) |
 | **API do Banco Central** | Dados macroeconômicos: SELIC e IPCA |
 | **Anthropic API** | Geração das análises via LLM (modelos Claude) |
@@ -27,8 +27,8 @@ Definição das tecnologias utilizadas no projeto. Onde a tecnologia específica
 
 | Fonte | Dados coletados |
 |---|---|
-| **fundamentus** | P/L, P/VP, ROE, ROIC, Margem Líquida, EV/EBITDA, Dividend Yield, Crescimento Receita 5a, dados do balanço |
-| **yfinance** | Cotação atual, histórico de preços, DRE histórico (para CAGR de lucro) |
+| **fundamentus** | P/L, P/VP, ROE, ROIC, Margem Líquida, EV/EBITDA, Dividend Yield, Crescimento Receita 5a, dados do balanço, EV, Dívida Líquida |
+| **yfinance** | Cotação atual, histórico de preços, DRE histórico (para CAGR de lucro), enriquecimento de indicadores faltantes |
 | **API BCB** | SELIC e IPCA (contexto macroeconômico) |
 
 ### FIIs (Fundos de Investimento Imobiliário)
@@ -38,6 +38,52 @@ Definição das tecnologias utilizadas no projeto. Onde a tecnologia específica
 | **yfinance** | Cotação, P/VP, P/L, Dividend Yield, histórico de dividendos, crescimento de dividendos |
 
 > **Decisão de design:** fundamentus não suporta FIIs via `get_papel()`. yfinance é a fonte exclusiva para FIIs.
+
+---
+
+## Classificação de Ativos
+
+### Regra de identificação de FIIs
+
+FIIs reais da B3 têm ticker no formato `XXXX11` (4 letras + número 11). Porém, **nem todo ticker terminado em 11 é FII** — units de empresas (SANB11, TAEE11, ENGI11, etc.) também usam esse sufixo.
+
+**Dois níveis de classificação:**
+
+1. **Offline (por símbolo):** padrão `^[A-Z]{4}11$` + lista de exclusão `_NOT_FII_UNITS` com ~120 units conhecidas
+2. **Online (via yfinance):** `industryKey` começa com `"reit-"` → FII confirmado. Fallback: `longName` contém "Fundo" e "Imobiliario"
+
+**Lista curada de FIIs:** `backend/scripts/populate_fiis.py` contém 180 FIIs confirmados via yfinance em 2026-05-17.
+
+---
+
+## Cálculo de Indicadores — Estratégias de Preenchimento
+
+O fundamentus não retorna EBITDA diretamente. Os indicadores são calculados em cascata:
+
+### Dívida/EBITDA (ações)
+
+```
+EBITDA derivado = Valor_da_firma (EV) / EV_EBITDA
+Dívida/EBITDA   = Div_Liquida / EBITDA derivado
+```
+
+Disponível apenas quando `EV_EBITDA > 0` e `Valor_da_firma > 0`.
+
+### Enriquecimento pós-coleta (`ensure_min_indicators.py`)
+
+Executado automaticamente após cada ETL. Para tickers com menos de 3 indicadores:
+
+1. **Estratégia 1 — yfinance:** busca ROE, Margem, P/L, P/VP, DY via `info`
+2. **Estratégia 2 — cálculo derivado:** ROE = lucro/patrimônio, Margem = lucro/receita, DY = dividendos_12m/preço, P/VP = preço/VPA
+3. **Se ainda < 3:** move para `inactive_tickers`
+
+### Dividend Yield dos FIIs
+
+O yfinance retorna `dividendYield` em escala inconsistente:
+- Alguns tickers: decimal (`0.0938` = 9.38%) — correto
+- Outros tickers: percentual (`9.38` = 9.38%) — precisa dividir por 100
+
+**Regra aplicada em `fii.py`:** se `dy_raw > 1.0` → divide por 100.
 
 ---
 
@@ -56,6 +102,8 @@ O scoring usa indicadores específicos por tipo, mas o **output é idêntico** p
 | EV/EBITDA | 10% | ≤ 6x |
 | Dividend Yield | 10% | ≥ 8% a.a. |
 | Crescimento Lucro YoY | 15% | ≥ 10% a.a. |
+
+> Indicadores ausentes recebem score neutro (50). CAGR de lucro disponível para ~44.7% das ações (limitação do yfinance).
 
 ### FIIs — Indicadores e Pesos
 
@@ -137,11 +185,14 @@ fundamentus (ações) + yfinance (FIIs + histórico DRE) + BCB (macro)
 backend/collectors/     → coleta bruta por fonte e tipo de ativo
         ↓
 backend/processors/
-  asset_classifier.py   → classifica stock/fii, detecta inativos
-  indicators.py         → calcula indicadores por tipo
+  asset_classifier.py   → classifica stock/fii (2 níveis), detecta inativos
+  indicators.py         → calcula indicadores por tipo (com derivação de EBITDA)
   scoring.py            → score específico por tipo, output unificado
         ↓
 Banco de dados          → persistência (tickers, financial_data, indicators)
+        ↓
+backend/scripts/
+  ensure_min_indicators.py → enriquece indicadores faltantes (yfinance + derivado)
         ↓
 backend/prompts/        → prompt estruturado com dados do tipo correto
         ↓
@@ -156,32 +207,10 @@ frontend/               → dashboard, gráficos e veredito
 
 | Script | Descrição | Quando executar |
 |---|---|---|
-| `backend/scripts/populate_all_tickers.py` | Popula banco com todos os ~993 tickers da B3 | Primeira carga ou reprocessamento completo |
+| `backend/scripts/populate_all_tickers.py` | Popula banco com todos os ~938 tickers de ações da B3 | Primeira carga ou reprocessamento completo |
+| `backend/scripts/populate_fiis.py` | Popula banco com os 180 FIIs reais confirmados | Primeira carga ou atualização da lista de FIIs |
 | `backend/scripts/update_income_growth.py` | Atualiza CAGR de lucro via yfinance (ações) | Após populate ou mensalmente |
-| `backend/scripts/ensure_min_indicators.py` | Verifica e enriquece tickers com < 3 indicadores | Automaticamente após cada ETL |
-
-#### `ensure_min_indicators.py` — Garantia de qualidade de dados
-
-Executado automaticamente ao final de cada rodada do ETL. Garante que todos os tickers ativos tenham pelo menos 3 indicadores disponíveis para o cálculo do score.
-
-**Fluxo por ticker com < 3 indicadores:**
-1. **Busca em fonte alternativa (yfinance):** ROE, Margem, P/L, P/VP, DY para ações; P/VP, DY calculado do histórico, crescimento de dividendos para FIIs
-2. **Cálculo derivado a partir do banco:** ROE = lucro/patrimônio, Margem = lucro/receita, Dívida/EBITDA, P/VP = preço/VPA, DY = dividendos12m/preço
-3. **Se ainda < 3 após todas as tentativas:** move para `inactive_tickers`
-
-```bash
-# Verificação completa (padrão — move inativos)
-python -m backend.scripts.ensure_min_indicators
-
-# Apenas relatório, sem alterar banco
-python -m backend.scripts.ensure_min_indicators --dry-run
-
-# Ticker específico
-python -m backend.scripts.ensure_min_indicators --ticker PETR4
-
-# Enriquece sem mover para inativos
-python -m backend.scripts.ensure_min_indicators --no-move-inactive
-```
+| `backend/scripts/ensure_min_indicators.py` | Verifica e enriquece tickers com < 3 indicadores | **Automático após cada ETL** |
 
 ---
 
@@ -202,7 +231,8 @@ python -m backend.scripts.ensure_min_indicators --no-move-inactive
 - **Dados públicos apenas** — nenhuma fonte paga ou proprietária
 - **Análise fundamentalista exclusivamente** — sem análise técnica/gráfica
 - **Output unificado** — mesmo formato de resposta para ações e FIIs (frontend único)
-- **Cobertura de crescimento de lucro:** ~44% das ações têm histórico DRE disponível no yfinance; os demais recebem score neutro nesse componente
+- **Cobertura de crescimento de lucro:** ~44.7% das ações têm histórico DRE disponível no yfinance; os demais recebem score neutro nesse componente
+- **FIIs identificados por lista curada:** 180 FIIs confirmados via `industryKey=reit-*` do yfinance; units de empresas (SANB11, TAEE11, etc.) são tratadas como ações
 
 ---
 

@@ -1,339 +1,486 @@
+"""
+Testes unitários para backend/processors/scoring.py
+
+Cobre:
+- Funções de score individuais (ações e FIIs)
+- calculate_stock_score / calculate_fii_score
+- calculate_score (entry point unificado)
+- _get_label
+"""
+
 import pytest
 from backend.processors.scoring import (
-    _score_growth,
+    # Ações
+    _score_pe_ratio,
     _score_roe,
-    _score_roic,
-    _score_net_margin,
     _score_debt_ebitda,
-    _score_valuation,
-    _annual_growth_rates,
-    _score_consistency,
+    _score_net_margin,
+    _score_ev_ebitda,
+    _score_dividend_yield_stock,
+    _score_net_income_growth,
+    calculate_stock_score,
+    # FIIs
+    _score_pvp_fii,
+    _score_pe_fii,
+    _score_dividend_yield_fii,
+    _score_dividend_growth,
+    calculate_fii_score,
+    # Unificado
     calculate_score,
     _get_label,
-    _WEIGHTS_WITHOUT_HISTORY,
-    _WEIGHTS_WITH_HISTORY,
+    _STOCK_WEIGHTS,
+    _FII_WEIGHTS,
 )
 
-def test_score_growth():
-    assert _score_growth(0.12, 0.15) == 100.0  # Ambos > 10%
-    assert _score_growth(0.06, None) == pytest.approx(60.0)   # (50 + (0.06 - 0.05) / 0.05 * 50) = 50 + 10 = 60
-    assert _score_growth(-0.10, -0.10) == 15.0 # Negativo penaliza
-    assert _score_growth(None, None) == 50.0   # Sem dados
 
-def test_score_roe():
-    assert _score_roe(0.25) == 100.0
-    assert _score_roe(0.16) == 80.0
-    assert _score_roe(-0.10) == 15.0
-    assert _score_roe(None) == 50.0
+# ===========================================================================
+# _get_label
+# ===========================================================================
 
-def test_score_roic():
-    assert _score_roic(0.20) == 100.0
-    assert _score_roic(0.12) == 85.0
-    assert _score_roic(None) == 50.0
+class TestGetLabel:
+    def test_excelente(self):
+        assert _get_label(100.0) == "Excelente"
+        assert _get_label(75.0) == "Excelente"
 
-def test_score_net_margin():
-    assert _score_net_margin(0.25) == 100.0
-    assert _score_net_margin(0.02) == 20.0
-    assert _score_net_margin(None) == 50.0
+    def test_bom(self):
+        assert _get_label(74.9) == "Bom"
+        assert _get_label(50.0) == "Bom"
 
-def test_score_debt_ebitda():
-    assert _score_debt_ebitda(0.5) == 100.0
-    assert _score_debt_ebitda(-1.0) == 100.0  # Caixa líquido
-    assert _score_debt_ebitda(1.5) == 62.5    # (75 - (1.5 - 1.0)/1.0 * 25) = 75 - 12.5 = 62.5
-    assert _score_debt_ebitda(4.0) == 15.0
-    assert _score_debt_ebitda(None) == 50.0
+    def test_regular(self):
+        assert _get_label(49.9) == "Regular"
+        assert _get_label(25.0) == "Regular"
 
-def test_score_valuation():
-    # P/L = 8, P/VP = 1.0 -> Excelente
-    assert _score_valuation(8.0, 1.0) == 100.0
-    
-    # Sem dados
-    assert _score_valuation(None, None) == 50.0
-    
-    # P/L = 12 (75 - (2/5)*25 = 65), P/VP = 2.0 (75 - (0.5/1.5)*25 = 66.66) -> avg = 65.83
-    assert pytest.approx(_score_valuation(12.0, 2.0), 0.1) == 65.8
-
-def test_calculate_score():
-    indicators = {
-        "roe": 0.25,                  # 100
-        "roic": 0.20,                 # 100
-        "net_margin": 0.25,           # 100
-        "debt_ebitda": 0.5,           # 100
-        "pe_ratio": 8.0,              # 100
-        "pb_ratio": 1.0,              # 100
-        "revenue_growth_yoy": 0.15,   # 100
-        "net_income_growth_yoy": 0.12 # 100
-    }
-    
-    result = calculate_score(indicators)
-    assert result["score"] == 100.0
-    assert result["label"] == "Excelente"
-    assert len(result["available_indicators"]) == 8
-
-def test_calculate_score_weak():
-    indicators = {
-        "roe": -0.20,
-        "roic": -0.10,
-        "net_margin": -0.15,
-        "debt_ebitda": 5.0,
-        "pe_ratio": 30.0,
-        "pb_ratio": 8.0,
-        "revenue_growth_yoy": -0.20,
-        "net_income_growth_yoy": -0.30
-    }
-    
-    result = calculate_score(indicators)
-    assert result["score"] < 25.0
-    assert result["label"] == "Fraco"
-
-def test_get_label():
-    assert _get_label(80.0) == "Excelente"
-    assert _get_label(60.0) == "Bom"
-    assert _get_label(30.0) == "Regular"
-    assert _get_label(10.0) == "Fraco"
+    def test_fraco(self):
+        assert _get_label(24.9) == "Fraco"
+        assert _get_label(0.0) == "Fraco"
 
 
-# ---------------------------------------------------------------------------
-# _annual_growth_rates
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# Pesos somam 1.0
+# ===========================================================================
 
-class TestAnnualGrowthRates:
-    def test_series_com_crescimento_positivo(self):
-        rates = _annual_growth_rates([100, 110, 121])
-        assert rates == pytest.approx([0.10, 0.10])
+class TestWeights:
+    def test_stock_weights_somam_1(self):
+        assert sum(_STOCK_WEIGHTS.values()) == pytest.approx(1.0)
 
-    def test_serie_com_dois_valores(self):
-        rates = _annual_growth_rates([100, 115])
-        assert rates == pytest.approx([0.15])
-
-    def test_serie_com_crescimento_negativo(self):
-        rates = _annual_growth_rates([100, 90])
-        assert rates == pytest.approx([-0.10])
-
-    def test_ignora_base_zero(self):
-        # Período com base zero não deve gerar taxa
-        rates = _annual_growth_rates([0, 100, 110])
-        assert len(rates) == 1
-        assert rates[0] == pytest.approx(0.10)
-
-    def test_ignora_base_negativa(self):
-        rates = _annual_growth_rates([-10, 100, 110])
-        assert len(rates) == 1
-        assert rates[0] == pytest.approx(0.10)
-
-    def test_ignora_valores_none(self):
-        rates = _annual_growth_rates([100, None, 121])
-        assert rates == []
-
-    def test_serie_vazia(self):
-        assert _annual_growth_rates([]) == []
-
-    def test_serie_com_um_valor(self):
-        assert _annual_growth_rates([100]) == []
-
-    def test_cinco_anos_crescimento_uniforme(self):
-        # Simula 5 anos com crescimento de 12% a.a.
-        series = [100 * (1.12 ** i) for i in range(5)]
-        rates = _annual_growth_rates(series)
-        assert len(rates) == 4
-        for r in rates:
-            assert r == pytest.approx(0.12, rel=1e-4)
+    def test_fii_weights_somam_1(self):
+        assert sum(_FII_WEIGHTS.values()) == pytest.approx(1.0)
 
 
-# ---------------------------------------------------------------------------
-# _score_consistency
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# Funções de score — AÇÕES
+# ===========================================================================
 
-class TestScoreConsistency:
-    def test_crescimento_excelente_todos_os_periodos(self):
-        # Receita e lucro crescendo >10% em todos os 4 períodos
-        history = {
-            "revenue":    [100, 112, 126, 141, 158],
-            "net_income": [10,  11.5, 13.2, 15.1, 17.2],
-        }
-        score, detail = _score_consistency(history)
-        assert score == 100.0
-        assert detail["periods_above_threshold"] == 8  # 4 períodos x 2 séries
-        assert detail["periods_evaluated"] == 8
+class TestScorePeRatio:
+    def test_excelente(self):
+        assert _score_pe_ratio(8.0) == 100.0
 
-    def test_crescimento_zero_retorna_score_baixo(self):
-        history = {
-            "revenue":    [100, 100, 100, 100, 100],
-            "net_income": [10,  10,  10,  10,  10],
-        }
-        score, detail = _score_consistency(history)
-        assert score == 0.0
-        assert detail["periods_above_threshold"] == 0
+    def test_none_retorna_neutro(self):
+        assert _score_pe_ratio(None) == 50.0
 
-    def test_penalidade_por_anos_negativos(self):
-        # Crescimento médio razoável mas com 2 anos negativos
-        history_sem_negativo = {
-            "revenue": [100, 110, 121, 133, 146],
-        }
-        history_com_negativo = {
-            "revenue": [100, 90, 121, 133, 146],  # 1 ano negativo
-        }
-        score_sem, _ = _score_consistency(history_sem_negativo)
-        score_com, _ = _score_consistency(history_com_negativo)
-        assert score_com < score_sem
+    def test_negativo_retorna_baixo(self):
+        assert _score_pe_ratio(-5.0) == 10.0
 
-    def test_penalidade_multiplos_anos_negativos(self):
-        history = {
-            "revenue":    [100, 90, 85, 95, 100],   # 2 anos negativos
-            "net_income": [10,  8,  7,  9,  10],    # 2 anos negativos
-        }
-        score, detail = _score_consistency(history)
-        # 4 anos negativos no total → penalidade de 20 pontos
+    def test_zero_retorna_baixo(self):
+        assert _score_pe_ratio(0.0) == 10.0
+
+    def test_alto_retorna_baixo(self):
+        score = _score_pe_ratio(50.0)
+        assert score < 25.0
+
+    def test_range_0_a_100(self):
+        for pe in [-10, 0, 5, 10, 15, 25, 50, 100]:
+            s = _score_pe_ratio(pe)
+            assert 0.0 <= s <= 100.0, f"P/L={pe} gerou score={s} fora do range"
+
+
+class TestScoreRoe:
+    def test_excelente(self):
+        assert _score_roe(0.25) == 100.0
+
+    def test_none_retorna_neutro(self):
+        assert _score_roe(None) == 50.0
+
+    def test_negativo_penaliza(self):
+        assert _score_roe(-0.10) < 25.0
+
+    def test_bom(self):
+        score = _score_roe(0.16)
+        assert 75.0 <= score < 100.0
+
+    def test_range_0_a_100(self):
+        for roe in [-0.5, -0.1, 0.0, 0.08, 0.15, 0.20, 0.30]:
+            s = _score_roe(roe)
+            assert 0.0 <= s <= 100.0, f"ROE={roe} gerou score={s} fora do range"
+
+
+class TestScoreDebtEbitda:
+    def test_excelente(self):
+        assert _score_debt_ebitda(0.5) == 100.0
+
+    def test_caixa_liquido(self):
+        assert _score_debt_ebitda(-1.0) == 100.0
+
+    def test_none_retorna_neutro(self):
+        assert _score_debt_ebitda(None) == 50.0
+
+    def test_alto_retorna_baixo(self):
+        assert _score_debt_ebitda(4.0) < 25.0
+
+    def test_range_0_a_100(self):
+        for d in [-5, 0, 0.5, 1.0, 2.0, 3.0, 5.0, 10.0]:
+            s = _score_debt_ebitda(d)
+            assert 0.0 <= s <= 100.0, f"Debt/EBITDA={d} gerou score={s} fora do range"
+
+
+class TestScoreNetMargin:
+    def test_excelente(self):
+        assert _score_net_margin(0.25) == 100.0
+
+    def test_none_retorna_neutro(self):
+        assert _score_net_margin(None) == 50.0
+
+    def test_baixo(self):
+        score = _score_net_margin(0.02)
         assert score < 50.0
 
-    def test_apenas_receita_disponivel(self):
-        history = {"revenue": [100, 112, 126, 141, 158]}
-        score, detail = _score_consistency(history)
-        assert score == 100.0
-        assert detail["net_income_rates"] == []
-        assert len(detail["revenue_rates"]) == 4
-
-    def test_apenas_lucro_disponivel(self):
-        history = {"net_income": [10, 11.5, 13.2, 15.1, 17.2]}
-        score, detail = _score_consistency(history)
-        assert score == 100.0
-        assert detail["revenue_rates"] == []
-        assert len(detail["net_income_rates"]) == 4
-
-    def test_sem_dados_retorna_neutro(self):
-        score, detail = _score_consistency({})
-        assert score == 50.0
-        assert detail["periods_evaluated"] == 0
-        assert detail["periods_above_threshold"] == 0
-
-    def test_series_com_apenas_um_valor_retorna_neutro(self):
-        # Menos de 2 valores não gera nenhuma taxa
-        score, detail = _score_consistency({"revenue": [100], "net_income": [10]})
-        assert score == 50.0
-
-    def test_crescimento_parcial_entre_0_e_10(self):
-        # Crescimento de 5% a.a. deve gerar score intermediário (não 0, não 100)
-        history = {"revenue": [100, 105, 110.25, 115.76, 121.55]}
-        score, detail = _score_consistency(history)
-        assert 0 < score < 100
-        assert detail["periods_above_threshold"] == 0
-
-    def test_detail_arredonda_taxas(self):
-        history = {"revenue": [100, 113]}
-        _, detail = _score_consistency(history)
-        assert detail["revenue_rates"] == [0.13]
-
-    def test_peso_receita_maior_que_lucro(self):
-        # Receita excelente (100pts), lucro péssimo (0pts)
-        # Peso receita=60%, lucro=40% → score esperado = 60
-        history = {
-            "revenue":    [100, 115],   # +15% → 100pts
-            "net_income": [10, 8],      # -20% → ~0pts
-        }
-        score, _ = _score_consistency(history)
-        # Com penalidade de 1 ano negativo (-5): score ≈ 55
-        assert 50 <= score <= 65
+    def test_range_0_a_100(self):
+        for m in [-0.5, 0.0, 0.02, 0.05, 0.10, 0.20, 0.40]:
+            s = _score_net_margin(m)
+            assert 0.0 <= s <= 100.0, f"Margem={m} gerou score={s} fora do range"
 
 
-# ---------------------------------------------------------------------------
-# calculate_score — comportamento com history
-# ---------------------------------------------------------------------------
+class TestScoreEvEbitda:
+    def test_excelente(self):
+        assert _score_ev_ebitda(4.0) == 100.0
 
-class TestCalculateScoreWithHistory:
-    _base_indicators = {
-        "roe": 0.20,
-        "roic": 0.15,
-        "net_margin": 0.18,
-        "debt_ebitda": 1.2,
-        "pe_ratio": 12.0,
-        "pb_ratio": 2.0,
-        "revenue_growth_yoy": 0.12,
+    def test_none_retorna_neutro(self):
+        assert _score_ev_ebitda(None) == 50.0
+
+    def test_zero_retorna_neutro(self):
+        assert _score_ev_ebitda(0.0) == 50.0
+
+    def test_alto_retorna_baixo(self):
+        assert _score_ev_ebitda(30.0) < 25.0
+
+    def test_range_0_a_100(self):
+        for ev in [0, 3, 6, 10, 15, 20, 30]:
+            s = _score_ev_ebitda(ev)
+            assert 0.0 <= s <= 100.0, f"EV/EBITDA={ev} gerou score={s} fora do range"
+
+
+class TestScoreDividendYieldStock:
+    def test_excelente(self):
+        assert _score_dividend_yield_stock(0.10) == 100.0
+
+    def test_none_retorna_neutro(self):
+        assert _score_dividend_yield_stock(None) == 50.0
+
+    def test_zero_retorna_baixo(self):
+        assert _score_dividend_yield_stock(0.0) == 25.0
+
+    def test_range_0_a_100(self):
+        for dy in [0.0, 0.02, 0.04, 0.06, 0.08, 0.12]:
+            s = _score_dividend_yield_stock(dy)
+            assert 0.0 <= s <= 100.0, f"DY={dy} gerou score={s} fora do range"
+
+
+class TestScoreNetIncomeGrowth:
+    def test_excelente(self):
+        assert _score_net_income_growth(0.15) == 100.0
+
+    def test_none_retorna_neutro(self):
+        assert _score_net_income_growth(None) == 50.0
+
+    def test_negativo_penaliza(self):
+        assert _score_net_income_growth(-0.20) < 25.0
+
+    def test_range_0_a_100(self):
+        for g in [-0.3, -0.1, 0.0, 0.05, 0.10, 0.20]:
+            s = _score_net_income_growth(g)
+            assert 0.0 <= s <= 100.0, f"Growth={g} gerou score={s} fora do range"
+
+
+# ===========================================================================
+# Funções de score — FIIs
+# ===========================================================================
+
+class TestScorePvpFii:
+    def test_excelente_desconto(self):
+        assert _score_pvp_fii(0.80) == 100.0
+
+    def test_none_retorna_neutro(self):
+        assert _score_pvp_fii(None) == 50.0
+
+    def test_premio_alto_penaliza(self):
+        assert _score_pvp_fii(2.0) < 25.0
+
+    def test_range_0_a_100(self):
+        for pvp in [0.5, 0.90, 1.0, 1.10, 1.5, 2.0]:
+            s = _score_pvp_fii(pvp)
+            assert 0.0 <= s <= 100.0, f"P/VP={pvp} gerou score={s} fora do range"
+
+
+class TestScorePeFii:
+    def test_excelente(self):
+        assert _score_pe_fii(10.0) == 100.0
+
+    def test_none_retorna_neutro(self):
+        assert _score_pe_fii(None) == 50.0
+
+    def test_negativo_retorna_baixo(self):
+        assert _score_pe_fii(-1.0) == 10.0
+
+    def test_range_0_a_100(self):
+        for pe in [0, 8, 12, 16, 22, 30]:
+            s = _score_pe_fii(pe)
+            assert 0.0 <= s <= 100.0, f"P/L FII={pe} gerou score={s} fora do range"
+
+
+class TestScoreDividendYieldFii:
+    def test_excelente(self):
+        assert _score_dividend_yield_fii(0.12) == 100.0
+
+    def test_none_retorna_neutro(self):
+        assert _score_dividend_yield_fii(None) == 50.0
+
+    def test_zero_retorna_baixo(self):
+        assert _score_dividend_yield_fii(0.0) == 25.0
+
+    def test_range_0_a_100(self):
+        for dy in [0.0, 0.04, 0.06, 0.08, 0.10, 0.15]:
+            s = _score_dividend_yield_fii(dy)
+            assert 0.0 <= s <= 100.0, f"DY FII={dy} gerou score={s} fora do range"
+
+
+class TestScoreDividendGrowth:
+    def test_excelente(self):
+        assert _score_dividend_growth(0.10) == 100.0
+
+    def test_none_retorna_neutro(self):
+        assert _score_dividend_growth(None) == 50.0
+
+    def test_negativo_penaliza(self):
+        assert _score_dividend_growth(-0.10) < 25.0
+
+    def test_range_0_a_100(self):
+        for g in [-0.2, 0.0, 0.04, 0.08, 0.15]:
+            s = _score_dividend_growth(g)
+            assert 0.0 <= s <= 100.0, f"DivGrowth={g} gerou score={s} fora do range"
+
+
+# ===========================================================================
+# calculate_stock_score
+# ===========================================================================
+
+class TestCalculateStockScore:
+    _excelente = {
+        "pe_ratio": 8.0,
+        "roe": 0.25,
+        "debt_ebitda": 0.5,
+        "net_margin": 0.25,
+        "ev_ebitda": 4.0,
+        "dividend_yield": 0.10,
         "net_income_growth_yoy": 0.15,
     }
 
-    def test_sem_history_usa_pesos_sem_historico(self):
-        result = calculate_score(self._base_indicators)
-        assert result["weights"] == _WEIGHTS_WITHOUT_HISTORY
-        assert "consistency" not in result["breakdown"]
-        assert "consistency_detail" not in result
+    _fraco = {
+        "pe_ratio": 50.0,
+        "roe": -0.20,
+        "debt_ebitda": 6.0,
+        "net_margin": -0.15,
+        "ev_ebitda": 30.0,
+        "dividend_yield": 0.0,
+        "net_income_growth_yoy": -0.30,
+    }
 
-    def test_com_history_usa_pesos_com_historico(self):
-        history = {
-            "revenue":    [100, 112, 126, 141, 158],
-            "net_income": [10,  11.5, 13.2, 15.1, 17.2],
-        }
-        result = calculate_score(self._base_indicators, history=history)
-        assert result["weights"] == _WEIGHTS_WITH_HISTORY
-        assert "consistency" in result["breakdown"]
-        assert "consistency_detail" in result
+    def test_score_excelente(self):
+        result = calculate_stock_score(self._excelente)
+        assert result["score"] == 100.0
+        assert result["label"] == "Excelente"
 
-    def test_consistency_detail_estrutura(self):
-        history = {
-            "revenue":    [100, 112, 126, 141, 158],
-            "net_income": [10,  11.5, 13.2, 15.1, 17.2],
-        }
-        result = calculate_score(self._base_indicators, history=history)
-        detail = result["consistency_detail"]
-        assert "revenue_rates" in detail
-        assert "net_income_rates" in detail
-        assert "periods_evaluated" in detail
-        assert "periods_above_threshold" in detail
-        assert detail["periods_evaluated"] == 8
-        assert detail["periods_above_threshold"] == 8
+    def test_score_fraco(self):
+        result = calculate_stock_score(self._fraco)
+        assert result["score"] < 25.0
+        assert result["label"] == "Fraco"
 
-    def test_history_com_crescimento_excelente_aumenta_score(self):
-        # Histórico excelente deve manter ou melhorar o score vs sem histórico
-        history_excelente = {
-            "revenue":    [100, 115, 132, 152, 175],  # ~15% a.a.
-            "net_income": [10,  11.8, 13.9, 16.4, 19.3],
-        }
-        result_sem = calculate_score(self._base_indicators)
-        result_com = calculate_score(self._base_indicators, history=history_excelente)
-        # Ambos devem ser Excelente; score com histórico ≥ sem histórico
-        assert result_com["score"] >= result_sem["score"] - 1.0  # tolerância de 1pt por redistribuição de pesos
+    def test_output_tem_campos_obrigatorios(self):
+        result = calculate_stock_score(self._excelente)
+        assert "score" in result
+        assert "label" in result
+        assert "breakdown" in result
+        assert "weights" in result
+        assert "available_indicators" in result
+        assert "asset_type" in result
 
-    def test_history_com_crescimento_ruim_reduz_score(self):
-        history_ruim = {
-            "revenue":    [100, 95, 90, 88, 85],   # queda consistente
-            "net_income": [10,  8,  6,  5,  4],
-        }
-        result_sem = calculate_score(self._base_indicators)
-        result_com = calculate_score(self._base_indicators, history=history_ruim)
-        assert result_com["score"] < result_sem["score"]
+    def test_asset_type_e_stock(self):
+        result = calculate_stock_score(self._excelente)
+        assert result["asset_type"] == "stock"
 
-    def test_history_none_equivale_a_sem_history(self):
-        result_none = calculate_score(self._base_indicators, history=None)
-        result_sem = calculate_score(self._base_indicators)
-        assert result_none["score"] == result_sem["score"]
-        assert result_none["weights"] == result_sem["weights"]
-
-    def test_history_vazio_equivale_a_sem_history(self):
-        result_vazio = calculate_score(self._base_indicators, history={})
-        result_sem = calculate_score(self._base_indicators)
-        assert result_vazio["score"] == result_sem["score"]
-        assert "consistency" not in result_vazio["breakdown"]
-
-    def test_history_com_series_de_um_elemento_equivale_a_sem_history(self):
-        # Série com 1 valor não gera taxas → não ativa consistency
-        result = calculate_score(self._base_indicators, history={"revenue": [100]})
-        assert result["weights"] == _WEIGHTS_WITHOUT_HISTORY
-        assert "consistency" not in result["breakdown"]
-
-    def test_score_permanece_entre_0_e_100_com_history(self):
-        history = {
-            "revenue":    [100, 50, 25, 10, 5],   # colapso total
-            "net_income": [10,  2,  -5, -10, -20],
-        }
-        indicators_ruins = {
-            "roe": -0.50, "roic": -0.30, "net_margin": -0.40,
-            "debt_ebitda": 10.0, "pe_ratio": 50.0, "pb_ratio": 15.0,
-            "revenue_growth_yoy": -0.50, "net_income_growth_yoy": -0.60,
-        }
-        result = calculate_score(indicators_ruins, history=history)
+    def test_score_entre_0_e_100(self):
+        result = calculate_stock_score(self._fraco)
         assert 0.0 <= result["score"] <= 100.0
 
-    def test_pesos_com_history_somam_1(self):
-        assert sum(_WEIGHTS_WITH_HISTORY.values()) == pytest.approx(1.0)
+    def test_indicadores_disponiveis(self):
+        result = calculate_stock_score(self._excelente)
+        assert len(result["available_indicators"]) == 7
 
-    def test_pesos_sem_history_somam_1(self):
-        assert sum(_WEIGHTS_WITHOUT_HISTORY.values()) == pytest.approx(1.0)
+    def test_indicadores_parciais_usa_neutro(self):
+        # Apenas ROE disponível — demais usam 50.0 (neutro)
+        result = calculate_stock_score({"roe": 0.25})
+        assert result["score"] > 0.0
+        assert result["score"] < 100.0
+
+    def test_sem_indicadores_retorna_score_neutro(self):
+        result = calculate_stock_score({})
+        assert result["score"] == pytest.approx(50.0)
+
+    def test_breakdown_tem_todos_os_componentes(self):
+        result = calculate_stock_score(self._excelente)
+        for key in _STOCK_WEIGHTS:
+            assert key in result["breakdown"], f"Componente '{key}' ausente no breakdown"
+
+
+# ===========================================================================
+# calculate_fii_score
+# ===========================================================================
+
+class TestCalculateFiiScore:
+    _excelente = {
+        "pb_ratio": 0.80,
+        "pe_ratio": 10.0,
+        "dividend_yield": 0.12,
+        "dividend_growth_yoy": 0.10,
+    }
+
+    _fraco = {
+        "pb_ratio": 3.0,
+        "pe_ratio": 40.0,
+        "dividend_yield": 0.02,
+        "dividend_growth_yoy": -0.15,
+    }
+
+    def test_score_excelente(self):
+        result = calculate_fii_score(self._excelente)
+        assert result["score"] == 100.0
+        assert result["label"] == "Excelente"
+
+    def test_score_fraco(self):
+        result = calculate_fii_score(self._fraco)
+        assert result["score"] < 25.0
+        assert result["label"] == "Fraco"
+
+    def test_output_tem_campos_obrigatorios(self):
+        result = calculate_fii_score(self._excelente)
+        assert "score" in result
+        assert "label" in result
+        assert "breakdown" in result
+        assert "weights" in result
+        assert "available_indicators" in result
+        assert "asset_type" in result
+
+    def test_asset_type_e_fii(self):
+        result = calculate_fii_score(self._excelente)
+        assert result["asset_type"] == "fii"
+
+    def test_score_entre_0_e_100(self):
+        result = calculate_fii_score(self._fraco)
+        assert 0.0 <= result["score"] <= 100.0
+
+    def test_breakdown_tem_todos_os_componentes(self):
+        result = calculate_fii_score(self._excelente)
+        for key in _FII_WEIGHTS:
+            assert key in result["breakdown"], f"Componente '{key}' ausente no breakdown"
+
+    def test_sem_indicadores_retorna_score_neutro(self):
+        result = calculate_fii_score({})
+        assert result["score"] == pytest.approx(50.0)
+
+
+# ===========================================================================
+# calculate_score — entry point unificado
+# ===========================================================================
+
+class TestCalculateScore:
+    def test_despacha_para_stock_por_padrao(self):
+        result = calculate_score({"roe": 0.20}, asset_type="stock")
+        assert result["asset_type"] == "stock"
+
+    def test_despacha_para_fii(self):
+        result = calculate_score({"pb_ratio": 0.90}, asset_type="fii")
+        assert result["asset_type"] == "fii"
+
+    def test_asset_type_padrao_e_stock(self):
+        result = calculate_score({"roe": 0.20})
+        assert result["asset_type"] == "stock"
+
+    def test_output_unificado_stock(self):
+        result = calculate_score({"roe": 0.20, "pe_ratio": 12.0}, asset_type="stock")
+        assert "score" in result
+        assert "label" in result
+        assert "breakdown" in result
+        assert "weights" in result
+        assert "available_indicators" in result
+        assert "asset_type" in result
+
+    def test_output_unificado_fii(self):
+        result = calculate_score({"pb_ratio": 0.90, "dividend_yield": 0.10}, asset_type="fii")
+        assert "score" in result
+        assert "label" in result
+        assert "breakdown" in result
+        assert "weights" in result
+        assert "available_indicators" in result
+        assert "asset_type" in result
+
+    def test_score_stock_excelente(self):
+        indicators = {
+            "pe_ratio": 8.0,
+            "roe": 0.25,
+            "debt_ebitda": 0.5,
+            "net_margin": 0.25,
+            "ev_ebitda": 4.0,
+            "dividend_yield": 0.10,
+            "net_income_growth_yoy": 0.15,
+        }
+        result = calculate_score(indicators, asset_type="stock")
+        assert result["score"] == 100.0
+        assert result["label"] == "Excelente"
+
+    def test_score_fii_excelente(self):
+        indicators = {
+            "pb_ratio": 0.80,
+            "pe_ratio": 10.0,
+            "dividend_yield": 0.12,
+            "dividend_growth_yoy": 0.10,
+        }
+        result = calculate_score(indicators, asset_type="fii")
+        assert result["score"] == 100.0
+        assert result["label"] == "Excelente"
+
+    def test_score_stock_fraco(self):
+        indicators = {
+            "pe_ratio": 50.0,
+            "roe": -0.20,
+            "debt_ebitda": 6.0,
+            "net_margin": -0.15,
+            "ev_ebitda": 30.0,
+            "dividend_yield": 0.0,
+            "net_income_growth_yoy": -0.30,
+        }
+        result = calculate_score(indicators, asset_type="stock")
+        assert result["score"] < 25.0
+        assert result["label"] == "Fraco"
+
+    def test_score_sempre_entre_0_e_100(self):
+        """Score nunca sai do range 0-100, mesmo com valores extremos."""
+        extremos = {
+            "pe_ratio": 9999.0,
+            "roe": -99.0,
+            "debt_ebitda": 999.0,
+            "net_margin": -99.0,
+            "ev_ebitda": 999.0,
+            "dividend_yield": 0.0,
+            "net_income_growth_yoy": -99.0,
+        }
+        result = calculate_score(extremos, asset_type="stock")
+        assert 0.0 <= result["score"] <= 100.0
