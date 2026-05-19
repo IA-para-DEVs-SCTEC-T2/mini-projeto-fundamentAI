@@ -11,7 +11,9 @@ Tabelas:
 
 import os
 from datetime import datetime
+from pathlib import Path
 
+from dotenv import load_dotenv
 from sqlalchemy import (
     Boolean,
     Column,
@@ -24,6 +26,10 @@ from sqlalchemy import (
     create_engine,
 )
 from sqlalchemy.orm import DeclarativeBase, relationship, sessionmaker
+
+# Carrega o .env da raiz do projeto (funciona independente do diretório de execução)
+_ROOT_DIR = Path(__file__).resolve().parents[3]  # mini-projeto-equipe08/
+load_dotenv(_ROOT_DIR / ".env")
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./fundamentai.db")
 

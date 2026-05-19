@@ -3,7 +3,7 @@ Entry point da API FastAPI do FundamentAI.
 
 Inicializa a aplicação, registra as rotas e configura o banco de dados.
 
-Para rodar localmente:
+Para rodar localmente (da raiz do projeto):
     uvicorn backend.api.main:app --reload --host 0.0.0.0 --port 8000
 
 Documentação interativa disponível em:
@@ -13,6 +13,13 @@ Documentação interativa disponível em:
 
 import logging
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+# Carrega o .env da raiz do projeto (funciona independente do diretório de execução)
+_ROOT_DIR = Path(__file__).resolve().parents[3]  # mini-projeto-equipe08/
+load_dotenv(_ROOT_DIR / ".env")
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
