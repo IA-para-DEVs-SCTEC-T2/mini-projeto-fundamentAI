@@ -103,8 +103,9 @@ Injetados no contexto de análise da LLM:
 
 | Camada | Tecnologia |
 |---|---|
-| Backend | Python |
-| Frontend | React |
+| Backend | Python + FastAPI |
+| Frontend | React + Vite |
+| Gráficos | Recharts |
 | Geração de análises | Anthropic API (Claude) |
 
 ### 🔄 Fluxo de Funcionamento
@@ -302,7 +303,7 @@ Os arquivos de steering em `.kiro/steering/` definem o contexto permanente injet
 
 - Python 3.8 ou superior
 - pip (gerenciador de pacotes Python)
-- Node.js 16+ e npm (para o frontend, quando implementado)
+- Node.js 18+ e npm (para o frontend)
 - Git
 
 ### 1️⃣ Clonar o Repositório
@@ -316,25 +317,20 @@ cd FundamentAI
 
 #### Instalar Dependências
 
-```bash
-cd backend
-pip install -r requirements.txt
-```
-
-**Recomendação:** Usar ambiente virtual para isolar dependências:
+Use sempre um ambiente virtual para isolar as dependências do projeto:
 
 ```bash
-# Criar ambiente virtual
-python -m venv venv
+# Na raiz do projeto: mini-projeto-equipe08/
+
+# Criar ambiente virtual dentro de backend/
+python -m venv backend/venv
 
 # Ativar ambiente virtual
-# No macOS/Linux:
-source venv/bin/activate
-# No Windows:
-venv\Scripts\activate
+source backend/venv/bin/activate  # macOS/Linux
+# backend\venv\Scripts\activate   # Windows
 
 # Instalar dependências
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 ```
 
 #### Configurar Variáveis de Ambiente
@@ -362,13 +358,14 @@ pip install -r requirements.txt
 #### Verificar Instalação
 
 ```bash
-# Testar importações
+# Testar importações (da raiz do projeto, com venv ativo)
 python -c "import fastapi, anthropic, yfinance, pandas; print('✅ Dependências instaladas com sucesso!')"
 ```
 
-### 3️⃣ Configurar Frontend *(quando implementado)*
+### 3️⃣ Configurar Frontend
 
 ```bash
+# No diretório frontend/
 cd frontend
 npm install
 ```
@@ -377,41 +374,22 @@ npm install
 
 #### Backend (API)
 
-**⚠️ IMPORTANTE:** Sempre ative o ambiente virtual antes de executar qualquer comando Python!
-
-**Opção 1: Executar do diretório `backend` (recomendado)**
+**⚠️ IMPORTANTE:** Sempre execute os comandos a partir da **raiz do projeto** (`mini-projeto-equipe08/`), não de dentro do diretório `backend/`. Os imports do projeto usam o prefixo `backend.` e dependem disso.
 
 ```bash
-cd backend
+# Na raiz do projeto: mini-projeto-equipe08/
 
 # Ativar ambiente virtual
-# No macOS/Linux:
-source venv/bin/activate
+source backend/venv/bin/activate  # macOS/Linux
+# backend\venv\Scripts\activate   # Windows
 
-# No Windows:
-venv\Scripts\activate
-
-# Executar a API (SEM o prefixo "backend.")
-uvicorn api.main:app --reload
-```
-
-**Opção 2: Executar da raiz do projeto**
-
-```bash
-# Ativar ambiente virtual
-# No macOS/Linux:
-source backend/venv/bin/activate
-
-# No Windows:
-backend\venv\Scripts\activate
-
-# Executar a API (COM o prefixo "backend.")
+# Executar a API
 uvicorn backend.api.main:app --reload
 ```
 
 Você saberá que o ambiente virtual está ativo quando ver `(venv)` no início da linha do terminal:
 ```bash
-(venv) user@machine backend %
+(venv) user@machine mini-projeto-equipe08 %
 ```
 
 A API estará disponível em `http://localhost:8000`
@@ -422,18 +400,30 @@ deactivate
 ```
 
 **Troubleshooting:**
-- **Erro `command not found: uvicorn`** → Você não ativou o ambiente virtual. Execute `source venv/bin/activate` primeiro.
-- **Erro `No module named 'backend'`** → Você está no diretório `backend` mas usando `uvicorn backend.api.main:app`. Use `uvicorn api.main:app --reload` (sem o prefixo "backend.").
-- **Erro `No module named 'fastapi'`** → Instale as dependências: `pip install -r requirements.txt`
+- **Erro `command not found: uvicorn`** → Você não ativou o ambiente virtual. Execute `source backend/venv/bin/activate` primeiro.
+- **Erro `No module named 'backend'`** → Você está rodando de dentro do diretório `backend/`. Volte para a raiz do projeto e use `uvicorn backend.api.main:app --reload`.
+- **Erro `No module named 'fastapi'`** → Instale as dependências: `pip install -r backend/requirements.txt`
+- **Erro `ANTHROPIC_API_KEY not found`** → Verifique se o arquivo `.env` existe na raiz do projeto com a chave preenchida.
 
-#### Frontend *(quando implementado)*
+#### Frontend
 
 ```bash
-cd frontend
-npm start
+# No diretório frontend/
+npm run dev
+```
+
+O frontend estará disponível em `http://localhost:5173`
+
+#### Testes do Frontend
+
+```bash
+# No diretório frontend/
+npm test
 ```
 
 ### 🔍 Estrutura de Dependências
+
+#### Backend
 
 | Dependência | Versão | Finalidade |
 |---|---|---|
@@ -443,17 +433,29 @@ npm start
 | `yfinance` | 0.2.61 | Cotações, histórico, DRE e dados de FIIs |
 | `fundamentus` | 0.3.2 | Indicadores fundamentalistas de ações da B3 |
 | `anthropic` | 0.52.0 | Geração de análises via LLM |
-| `pandas` | ≥2.3.0 | Processamento de dados |
+| `pandas` | ≥2.2.0 | Processamento de dados |
 | `requests` | ≥2.28.0 | Cliente HTTP (BCB API) |
 | `apscheduler` | 3.10.4 | Agendamento do ETL |
 | `python-dotenv` | 1.0.1 | Gerenciamento de variáveis de ambiente |
 | `pytz` | 2025.2 | Timezone de Brasília (prompt logging) |
 
+#### Frontend
+
+| Dependência | Versão | Finalidade |
+|---|---|---|
+| `react` | ^19.2.5 | Framework principal |
+| `react-dom` | ^19.2.5 | Renderização no DOM |
+| `recharts` | ^3.8.1 | Gráficos e visualizações |
+| `axios` | ^1.16.0 | Cliente HTTP para chamadas à API |
+| `lucide-react` | ^1.14.0 | Ícones |
+| `vite` | ^8.0.10 | Build tool e dev server |
+| `vitest` | ^4.1.5 | Framework de testes |
+
 ### ⚠️ Troubleshooting
 
 **Erro `command not found: uvicorn`:**
 - **Causa:** Ambiente virtual não está ativado
-- **Solução:** Execute `source venv/bin/activate` (macOS/Linux) ou `venv\Scripts\activate` (Windows) antes de rodar o uvicorn
+- **Solução:** Execute `source backend/venv/bin/activate` (macOS/Linux) ou `backend\venv\Scripts\activate` (Windows) antes de rodar o uvicorn
 
 **Erro ao instalar `yfinance`:**
 ```bash
@@ -471,16 +473,16 @@ sudo apt-get install python3-dev libopenblas-dev
 ```
 
 **Erro "ANTHROPIC_API_KEY not found":**
-- Verificar se o arquivo `.env` existe na raiz do projeto
+- Verificar se o arquivo `.env` existe na **raiz do projeto** (não dentro de `backend/`)
 - Verificar se a variável está preenchida corretamente
 - Reiniciar o servidor após alterar o `.env`
 
 **Ambiente virtual não existe:**
 ```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # macOS/Linux
-pip install -r requirements.txt
+# Da raiz do projeto
+python -m venv backend/venv
+source backend/venv/bin/activate  # macOS/Linux
+pip install -r backend/requirements.txt
 ```
 
 ---
@@ -555,19 +557,23 @@ Para mais detalhes sobre o sistema de prompt logging, incluindo arquitetura, lim
 
 ---
 
-## 🧩 Como Implementar
+## 🧩 Arquitetura Implementada
 
 ### Backend
 
-- Scripts Python para coleta e processamento
-- ETL diário
-- API para servir dados processados
+- Coleta de dados via Python (fundamentus, yfinance, BCB)
+- Processamento e cálculo de indicadores por tipo de ativo
+- ETL diário agendado (19h Brasília)
+- API REST com FastAPI
 
 ### Frontend
 
-- Interface em React
-- Dashboard com gráficos
-- Visualização de análises
+- Interface em React com Vite
+- Páginas: Home (busca), Análise, Ações, FIIs, Aprendizado
+- Componentes: ScoreCard, ScoreRing, IndicatorTable, Chart, Verdict, Sidebar, Header
+- Gráficos com Recharts
+- Chamadas à API via Axios
+- Testes com Vitest + Testing Library
 
 ---
 
