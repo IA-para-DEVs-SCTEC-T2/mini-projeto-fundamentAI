@@ -112,3 +112,39 @@ um arquivo ficou de fora do commit. Adicione-o.
 
 ---
 
+## Prompt: O readme.md está inconsistente. Seguindo as instruções ...
+- Responsável: Alysson Girotto
+- Branch: feature/integracao-frontend-backend
+- Data/hora: 2026-05-19 18:57:11 (Brasília)
+
+### Prompt original
+```
+O readme.md está inconsistente. Seguindo as instruções da configuração do backend a partir do diretório backend eu não consegui rodar o projeto
+```
+
+---
+
+## Prompt: Considere que o frontend já foi implementado. Ajus...
+- Responsável: Alysson Girotto
+- Branch: feature/integracao-frontend-backend
+- Data/hora: 2026-05-19 19:02:52 (Brasília)
+
+### Prompt original
+```
+Considere que o frontend já foi implementado. Ajuste a documentação do readme.md relacionada ao frontend
+```
+
+---
+
+## Prompt: No bloco<bloco>### 2️⃣ Configurar Backend#### Inst...
+- Responsável: Alysson Girotto
+- Branch: feature/integracao-frontend-backend
+- Data/hora: 2026-05-19 19:06:08 (Brasília)
+
+### Prompt original
+```
+No bloco<bloco>### 2️⃣ Configurar Backend#### Instalar Dependências```bashcd backendpip install -r requirements.txt```**Recomendação:** Usar ambiente virtual para isolar dependências:```bash# Criar ambiente virtualpython -m venv venv# Ativar ambiente virtual# No macOS/Linux:source venv/bin/activate# No Windows:venv\Scripts\activate# Instalar dependênciaspip install</bloco>Todos os dados estão coerentes? São necessários?
+```
+
+---
+
