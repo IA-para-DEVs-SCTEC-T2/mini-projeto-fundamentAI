@@ -7,24 +7,34 @@ import Analysis from './pages/Analysis';
 import Acoes from './pages/Acoes';
 import Fiis from './pages/Fiis';
 import Aprendizado from './pages/Aprendizado';
+import NotFound from './pages/NotFound';
+import ComingSoonToast from './components/ComingSoonToast';
+import { useComingSoon } from './hooks/useComingSoon';
 import { usePageTitle } from './hooks/usePageTitle';
 import './index.css';
 
+// Views mapeadas para páginas reais
+const MAPPED_VIEWS = new Set(['home', 'analysis', 'acoes', 'fiis', 'aprendizado']);
+
 const PAGE_TITLES = {
-  home:       'Início',
-  acoes:      'Ações',
-  fiis:       'FIIs',
+  home:        'Início',
+  acoes:       'Ações',
+  fiis:        'FIIs',
   aprendizado: 'Aprendizado',
-  analysis:   null, // título montado dinamicamente com o ticker
+  notfound:    'Em breve',
+  analysis:    null, // título montado dinamicamente com o ticker
 };
 
 export default function App() {
   const [ticker, setTicker]   = useState(null);
   const [history, setHistory] = useState([]);
-  const [view, setView]       = useState('home');   // 'home' | 'analysis' | 'acoes' | 'fiis' | 'aprendizado'
+  const [view, setView]       = useState('home');   // 'home' | 'analysis' | 'acoes' | 'fiis' | 'aprendizado' | 'notfound'
   const [activeNav, setNav]   = useState('home');
 
-  // Título dinâmico: análise mostra o ticker, demais páginas usam o mapeamento
+  // Hook de "futura versão" — compartilhado entre todos os componentes via prop drilling
+  const { showToast, hideToast, toastMessage } = useComingSoon();
+
+  // Título dinâmico
   const pageTitle = view === 'analysis' && ticker
     ? ticker
     : PAGE_TITLES[view] ?? 'Início';
@@ -48,19 +58,23 @@ export default function App() {
 
   const handleNav = (id) => {
     setNav(id);
-    if (id === 'home') {
-      setTicker(null);
-      setView('home');
-    } else if (id === 'acoes') {
-      setView('acoes');
-    } else if (id === 'fiis') {
-      setView('fiis');
-    } else if (id === 'aprendizado') {
-      setView('aprendizado');
+    if (MAPPED_VIEWS.has(id)) {
+      if (id === 'home') {
+        setTicker(null);
+        setView('home');
+      } else {
+        setView(id);
+      }
     } else {
-      // favoritos → próximas etapas
-      setView('home');
+      // Qualquer nav não mapeada (ex: favoritos) → página de roadmap
+      setView('notfound');
     }
+  };
+
+  const handleGoHome = () => {
+    setTicker(null);
+    setView('home');
+    setNav('home');
   };
 
   return (
@@ -72,6 +86,7 @@ export default function App() {
           onSearch={handleSearch}
           currentTicker={ticker || ''}
           showSearch={view === 'analysis'}
+          onComingSoon={showToast}
         />
 
         <div className="app-content">
@@ -88,7 +103,11 @@ export default function App() {
             <Analysis
               ticker={ticker}
               onSearch={handleSearch}
+              onComingSoon={showToast}
             />
+          )}
+          {view === 'notfound' && (
+            <NotFound onHome={handleGoHome} />
           )}
         </div>
       </div>
@@ -111,6 +130,9 @@ export default function App() {
           </button>
         )}
       </nav>
+
+      {/* Toast global de "futura versão" — renderizado no topo do DOM */}
+      <ComingSoonToast message={toastMessage} onClose={hideToast} />
     </div>
   );
 }
