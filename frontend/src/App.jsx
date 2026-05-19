@@ -7,13 +7,28 @@ import Analysis from './pages/Analysis';
 import Acoes from './pages/Acoes';
 import Fiis from './pages/Fiis';
 import Aprendizado from './pages/Aprendizado';
+import { usePageTitle } from './hooks/usePageTitle';
 import './index.css';
+
+const PAGE_TITLES = {
+  home:       'Início',
+  acoes:      'Ações',
+  fiis:       'FIIs',
+  aprendizado: 'Aprendizado',
+  analysis:   null, // título montado dinamicamente com o ticker
+};
 
 export default function App() {
   const [ticker, setTicker]   = useState(null);
   const [history, setHistory] = useState([]);
   const [view, setView]       = useState('home');   // 'home' | 'analysis' | 'acoes' | 'fiis' | 'aprendizado'
   const [activeNav, setNav]   = useState('home');
+
+  // Título dinâmico: análise mostra o ticker, demais páginas usam o mapeamento
+  const pageTitle = view === 'analysis' && ticker
+    ? ticker
+    : PAGE_TITLES[view] ?? 'Início';
+  usePageTitle(pageTitle);
 
   const handleSearch = (symbol) => {
     if (!symbol) {
