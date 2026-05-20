@@ -335,30 +335,45 @@ function filterHistory(history, period) {
 // ── Main component ───────────────────────────────────────────────────────────
 
 export default function Analysis({ ticker, onSearch, onComingSoon }) {
-  const [loading, setLoading]       = useState(false);
-  const [tickerData, setTickerData] = useState(null);
-  const [analysisData, setAnalysis] = useState(null);
-  const [error, setError]           = useState(null);
-  const [activeTab, setActiveTab]   = useState('overview');
-  const [period, setPeriod]         = useState('1A');
+  const [loading, setLoading]         = useState(false);
+  const [tickerData, setTickerData]   = useState(null);
+  const [analysisData, setAnalysis]   = useState(null);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysisError, setAnalysisError]     = useState(null);
+  const [error, setError]             = useState(null);
+  const [activeTab, setActiveTab]     = useState('overview');
+  const [period, setPeriod]           = useState('1A');
   const [showScoreModal, setShowScoreModal] = useState(false);
 
+  // Carrega apenas dados do ticker (cotação + indicadores + histórico)
   const fetchData = async (symbol) => {
     setLoading(true);
     setTickerData(null);
     setAnalysis(null);
     setError(null);
+    setAnalysisError(null);
     try {
-      const [td, ad] = await Promise.all([
-        getTickerData(symbol),
-        getAnalysis(symbol, 'haiku', true),
-      ]);
+      const td = await getTickerData(symbol);
       setTickerData(td);
-      setAnalysis(ad);
     } catch (err) {
       setError(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Carrega análise via Anthropic — chamado apenas quando o usuário abre a aba IA
+  const fetchAnalysis = async (symbol) => {
+    if (analysisData) return; // já carregado, não refaz
+    setAnalysisLoading(true);
+    setAnalysisError(null);
+    try {
+      const ad = await getAnalysis(symbol, 'haiku', true);
+      setAnalysis(ad);
+    } catch (err) {
+      setAnalysisError(err);
+    } finally {
+      setAnalysisLoading(false);
     }
   };
 
@@ -368,6 +383,14 @@ export default function Analysis({ ticker, onSearch, onComingSoon }) {
       fetchData(ticker);
     }
   }, [ticker]);
+
+  // Quando o usuário clica na aba IA, dispara a chamada à Anthropic
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    if (tabId === 'ai' && ticker) {
+      fetchAnalysis(ticker);
+    }
+  };
 
   const filteredHistory = useMemo(
     () => filterHistory(tickerData?.price_history, period),
@@ -383,7 +406,7 @@ export default function Analysis({ ticker, onSearch, onComingSoon }) {
       onHome={() => onSearch(null)}
     />
   );
-  if (!tickerData || !analysisData) return null;
+  if (!tickerData) return null;
 
   const { quote, indicators, asset_type, name, sector, segment } = tickerData;
   const isStock = asset_type !== 'fii';
@@ -391,8 +414,8 @@ export default function Analysis({ ticker, onSearch, onComingSoon }) {
   const change  = quote?.change_percent;
   const isUp    = (change ?? 0) >= 0;
 
-  // Use score from ticker endpoint (calculated from indicators), fallback to analysis score
-  const displayScore = tickerData.score?.score ?? analysisData.score ?? 0;
+  // Score vem do endpoint do ticker (calculado a partir dos indicadores reais)
+  const displayScore = tickerData.score?.score ?? 0;
 
   // Logo initials
   const logoText = (tickerData.ticker || ticker || '').slice(0, 2).toUpperCase();
@@ -502,7 +525,7 @@ export default function Analysis({ ticker, onSearch, onComingSoon }) {
           <button
             key={tab.id}
             className={`analysis-tab${activeTab === tab.id ? ' analysis-tab-active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => handleTabChange(tab.id)}
           >
             {tab.label}
             {tab.badge && <span className="tab-badge-new">{tab.badge}</span>}
@@ -672,7 +695,33 @@ export default function Analysis({ ticker, onSearch, onComingSoon }) {
       )}
 
       {activeTab === 'ai' && (
-        <Verdict analysisData={analysisData} />
+        <>
+          {analysisLoading && (
+            <div className="tab-placeholder">
+              <div className="tab-placeholder-icon">🤖</div>
+              <div>Gerando análise com Inteligência Artificial...</div>
+            </div>
+          )}
+          {analysisError && !analysisLoading && (
+            <div className="tab-placeholder">
+              <div className="tab-placeholder-icon">⚠️</div>
+              <div style={{ color: 'var(--danger)', marginBottom: '0.75rem' }}>
+                {typeof analysisError === 'string'
+                  ? analysisError
+                  : analysisError?.detail || 'Erro ao gerar análise via IA.'}
+              </div>
+              <button
+                className="btn-primary"
+                onClick={() => { setAnalysis(null); fetchAnalysis(ticker); }}
+              >
+                Tentar novamente
+              </button>
+            </div>
+          )}
+          {analysisData && !analysisLoading && (
+            <Verdict analysisData={analysisData} />
+          )}
+        </>
       )}
 
       {activeTab === 'history' && (

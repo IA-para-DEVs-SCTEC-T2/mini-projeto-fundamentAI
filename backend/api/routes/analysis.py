@@ -283,36 +283,14 @@ def _call_anthropic(system_prompt: str, user_prompt: str, model: str) -> str:
     """
     api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key or api_key == "lac-to-cocos":
-        logger.warning("ANTHROPIC_API_KEY ausente ou inválida. Retornando dados mockados.")
-        return """
-        {
-          "verdict": "Compra (Mock)",
-          "score": 85.5,
-          "confidence_level": "Alto",
-          "positive_points": [
-            "Excelente retorno sobre patrimônio (ROE)",
-            "Baixo nível de endividamento",
-            "Margens saudáveis em comparação ao setor"
-          ],
-          "negative_points": [
-            "Setor altamente sensível à taxa de juros",
-            "Crescimento de receita estável, mas sem grandes saltos recentes"
-          ],
-          "indicators_explanation": {
-            "roe": "A empresa tem uma ótima eficiência em gerar lucros com o dinheiro dos acionistas.",
-            "roic": "O retorno sobre os investimentos feitos no negócio é muito atrativo.",
-            "net_margin": "Sobra uma boa fatia de lucro para cada Real vendido.",
-            "debt_ebitda": "A dívida está totalmente sob controle e pode ser paga facilmente com a geração de caixa atual.",
-            "pe_ratio": "A ação está sendo negociada a um preço justo em relação ao lucro que gera.",
-            "pb_ratio": "O mercado valoriza o patrimônio da empresa, o que é um bom sinal.",
-            "growth": "A empresa mantém um crescimento contínuo, embora mais conservador nos últimos anos."
-          },
-          "moment_suggestion": "O momento atual é propício para estudos de entrada a longo prazo, considerando os fundamentos sólidos.",
-          "conclusion": "Os dados indicam que a empresa possui fundamentos robustos e excelente capacidade de gerar valor ao acionista, sendo uma boa opção para compor carteira. (OBS: Este é um resultado MOCK gerado para testes, pois a chave da API não foi configurada).",
-          "risk_assessment": "Baixo",
-          "disclaimer": "Esta análise é informativa e baseada em dados históricos. Não constitui recomendação de investimento."
-        }
-        """
+        logger.error("ANTHROPIC_API_KEY não configurada. Análise via LLM indisponível.")
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "A chave da API Anthropic (ANTHROPIC_API_KEY) não está configurada. "
+                "Defina a variável de ambiente no arquivo .env para habilitar a análise via IA."
+            ),
+        )
 
     try:
         client = anthropic.Anthropic(api_key=api_key)
