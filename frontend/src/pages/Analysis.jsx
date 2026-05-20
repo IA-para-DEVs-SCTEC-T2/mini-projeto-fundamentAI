@@ -334,7 +334,7 @@ function filterHistory(history, period) {
 
 // ── Main component ───────────────────────────────────────────────────────────
 
-export default function Analysis({ ticker, onSearch }) {
+export default function Analysis({ ticker, onSearch, onComingSoon }) {
   const [loading, setLoading]       = useState(false);
   const [tickerData, setTickerData] = useState(null);
   const [analysisData, setAnalysis] = useState(null);
@@ -430,11 +430,20 @@ export default function Analysis({ ticker, onSearch }) {
           Voltar
         </button>
         <div className="analysis-header-actions">
-          <button className="analysis-fav-btn">
+          <button
+            className="analysis-fav-btn"
+            onClick={() => onComingSoon?.()}
+            title="Disponível em breve"
+          >
             <Star size={14} />
             Adicionar aos favoritos
           </button>
-          <button className="analysis-bell-btn" aria-label="Notificações">
+          <button
+            className="analysis-bell-btn"
+            aria-label="Notificações — disponível em breve"
+            onClick={() => onComingSoon?.()}
+            title="Disponível em breve"
+          >
             <Bell size={15} />
           </button>
         </div>
@@ -535,7 +544,11 @@ export default function Analysis({ ticker, onSearch }) {
                       </button>
                     ))}
                   </div>
-                  <button className="compare-dropdown">
+                  <button
+                    className="compare-dropdown"
+                    onClick={() => onComingSoon?.()}
+                    title="Disponível em breve"
+                  >
                     Comparar com <ChevronDown size={12} />
                   </button>
                 </div>
@@ -688,7 +701,10 @@ export default function Analysis({ ticker, onSearch }) {
       {/* ── Score Modal ── */}
       {showScoreModal && (
         <ScoreModal
-          info={getAssetInfo(tickerData.ticker || ticker, name, sector, asset_type)}
+          ticker={tickerData.ticker || ticker}
+          name={name}
+          sector={sector}
+          assetType={asset_type}
           score={displayScore}
           onClose={() => setShowScoreModal(false)}
         />
